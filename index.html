@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyApplier — AI Job Search & Tailor Agent</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #080b10;
+            --bg-surface: rgba(18, 22, 33, 0.7);
+            --bg-card: rgba(26, 32, 48, 0.4);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(99, 102, 241, 0.2);
+            --primary: #4285F4;
+            --primary-hover: #357ae8;
+            --primary-glow: rgba(66, 133, 244, 0.4);
+            --accent: #4285F4;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --text-dim: #6b7280;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 118, 212, 0.08) 0%, transparent 40%);
+            background-attachment: fixed;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(8, 11, 16, 0.8);
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand span {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--warning);
+            box-shadow: 0 0 10px var(--warning);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Search Section */
+        .search-wrapper {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 30px;
+            backdrop-filter: blur(16px);
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px 0 rgba(66, 133, 244, 0.08);
+        }
+
+        .search-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .search-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-group {
+            flex-grow: 1;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--border-glow);
+            background: #ffffff;
+        }
+
+        .btn {
+            padding: 16px 28px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px 0 var(--primary-glow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 var(--primary-glow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 30px;
+            min-height: 600px;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            backdrop-filter: blur(16px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 8px 32px 0 rgba(66, 133, 244, 0.08);
+        }
+
+        .panel-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .jobs-list {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 600px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .job-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 18px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .job-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .job-card:hover {
+            transform: translateX(4px) translateY(-2px);
+            background: rgba(66, 133, 244, 0.05);
+            border-color: rgba(66, 133, 244, 0.3);
+            box-shadow: 0 4px 20px rgba(66, 133, 244, 0.1);
+        }
+
+        .job-card:hover::before {
+            opacity: 1;
+        }
+
+        .job-card.active {
+            background: rgba(66, 133, 244, 0.1);
+            border-color: var(--primary);
+        }
+
+        .job-card.active::before {
+            opacity: 1;
+        }
+
+        .job-card-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .job-card-company {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .job-card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        .badge-date {
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            font-size: 11px;
+        }
+
+        /* Detail Panel content */
+        .detail-placeholder {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 40px;
+            color: var(--text-dim);
+            text-align: center;
+            gap: 16px;
+            flex-grow: 1;
+        }
+
+        .detail-placeholder svg {
+            width: 64px;
+            height: 64px;
+            color: var(--text-dim);
+        }
+
+        .detail-content {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            max-height: 600px;
+            flex-grow: 1;
+        }
+
+        .detail-section-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .resume-textarea {
+            width: 100%;
+            height: 140px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 13px;
+            resize: none;
+            line-height: 1.5;
+            transition: all 0.3s;
+        }
+
+        .resume-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--border-glow);
+        }
+
+        /* Tabs UI */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            gap: 8px;
+            padding: 0 24px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .tab-btn {
+            padding: 16px 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: #fff;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            padding: 24px;
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+            line-height: 1.6;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Match score widget */
+        .match-score-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(99, 102, 241, 0.05);
+            border: 1px solid var(--border-glow);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .match-score-circle {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .match-score-svg {
+            transform: rotate(-90deg);
+            width: 70px;
+            height: 70px;
+        }
+
+        .match-score-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.05);
+            stroke-width: 6;
+        }
+
+        .match-score-progress {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: 201; /* 2 * PI * r (r=32) */
+            stroke-dashoffset: 201;
+            transition: stroke-dashoffset 1s ease-out;
+        }
+
+        .match-score-value {
+            position: absolute;
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .match-text h4 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .match-text p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Results view elements */
+        .copy-btn {
+            align-self: flex-start;
+            padding: 8px 16px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 12px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-muted);
+        }
+
+        .suggestions-list, .interview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .suggestion-item, .interview-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .interview-item h4 {
+            color: var(--accent);
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        /* Loading spinner */
+        .loader-wrapper {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(99, 102, 241, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            animation: pulseText 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulseText {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Scrollbar customisation */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-dim);
+        }
+
+        /* Expander / Details styling */
+        .expander {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.3s;
+            margin-bottom: 12px;
+        }
+
+        .expander[open] {
+            border-color: var(--primary-glow);
+        }
+
+        .expander-summary {
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            user-select: none;
+            outline: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.02);
+            list-style: none; /* Hide default arrow */
+        }
+        
+        .expander-summary::-webkit-details-marker {
+            display: none; /* Hide default arrow in Safari */
+        }
+
+        .expander-summary::after {
+            content: '▼';
+            font-size: 10px;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+
+        .expander[open] .expander-summary::after {
+            transform: rotate(180deg);
+        }
+
+        .expander-content {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Utility classes */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <img src="/aligned_labs_logo.jpg" alt="Aligned Labs" style="height: 40px; width: auto; object-fit: contain; border: 1px solid var(--border-color);">
+            <div class="brand">
+                Easy<span>Applier</span>
+            </div>
+        </div>
+        <div class="status-badge">
+            <div class="status-dot"></div>
+            <span>FastAPI Agent Online</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Search Section -->
+        <div class="search-wrapper">
+            <div class="search-title">Search LinkedIn Job Listings</div>
+            <div class="search-subtitle">Pull the 35 most recently posted jobs to start tailoring your application</div>
+            <div class="search-form">
+                <div class="input-group">
+                    <input type="text" id="job-title-input" class="search-input" placeholder="e.g. Python Developer, Machine Learning Engineer...">
+                </div>
+                <button type="button" class="btn" id="search-btn">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    Search Jobs
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Left Panel: Job Listings -->
+            <div class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        Job Postings
+                    </div>
+                    <span style="font-size: 13px; color: var(--text-muted);" id="job-count-badge">0 found</span>
+                </div>
+                
+                <div class="jobs-list" id="jobs-list-container">
+                    <div class="detail-placeholder">
+                        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875c-.621 0-1.125-.504-1.125-1.125v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.45.258-.717.258H3.75c-.266 0-.523-.093-.717-.258m16.5 0a2.18 2.18 0 01.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m0 0V6.25c0-1.098-.826-1.97-1.922-2.025a47.95 47.95 0 00-6.071 0C5.122 4.28 4.3 5.152 4.3 6.25v.806m9.75 0a48.693 48.693 0 01-6.071 0"></path></svg>
+                        <p>Search a job title to retrieve postings</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Selection / Application Tailor -->
+            <div class="panel" id="tailor-panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.982-11.795m-8.982 6.699l.066-.027m0 0L6 18l.8-6.195m0 0L17 3l3 3-10.187 9.904z"></path></svg>
+                        Application Tailor Agent
+                    </div>
+                </div>
+
+                <div class="detail-placeholder" id="tailor-empty-state">
+                    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path></svg>
+                    <p>Select a job posting from the left to start configuring the AI optimization</p>
+                </div>
+
+                <!-- Input View -->
+                <div class="detail-content hidden" id="tailor-input-view">
+                    <div>
+                        <h2 style="font-size: 20px; font-weight: 600;" id="job-detail-title">Job Title</h2>
+                        <div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;" id="job-detail-company">Company</div>
+                        <div style="font-size: 13px; color: var(--text-dim); margin-top: 2px;" id="job-detail-location">Location</div>
+                        <a href="#" target="_blank" id="job-detail-link" class="copy-btn" style="margin-top: 10px; text-decoration: none;">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            View Job on LinkedIn
+                        </a>
+                    </div>
+
+                    <hr style="border: 0; border-top: 1px solid var(--border-color);">
+
+
+                    <div>
+                        <div class="detail-section-title">Focus Areas / User Notes (Optional)</div>
+                        <input type="text" id="notes-input" class="search-input" style="padding: 12px;" placeholder="e.g. Highlight my familiarity with Google's Antigravity CLI and App Hub..." value="Highlight my familiarity with Google's Antigravity CLI and App Hub.">
+                    </div>
+
+                    <button class="btn" id="optimize-btn" style="width: 100%; justify-content: center; margin-top: 10px;">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        Optimize Application with Gemini
+                    </button>
+                </div>
+
+                <!-- Loading View -->
+                <div class="loader-wrapper hidden" id="tailor-loading-view">
+                    <div class="spinner"></div>
+                    <div class="loader-text">Analyzing job requirements and resume...</div>
+                </div>
+
+                <!-- Result View -->
+                <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;" class="hidden" id="tailor-result-view">
+                    <div style="padding: 24px 24px 12px 24px;">
+                        <div class="match-score-container">
+                            <div class="match-score-circle">
+                                <svg class="match-score-svg">
+                                    <circle class="match-score-bg" cx="35" cy="35" r="32"></circle>
+                                    <circle class="match-score-progress" id="score-progress" cx="35" cy="35" r="32"></circle>
+                                </svg>
+                                <div class="match-score-value" id="score-text">0%</div>
+                            </div>
+                            <div class="match-text">
+                                <h4 id="match-score-title">Excellent Match</h4>
+                                <p>Optimized tailored application strategy is ready.</p>
+                            </div>
+                        </div>
+                        <button class="copy-btn" id="restart-btn">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                            Back to configuration
+                        </button>
+                    </div>
+
+                    <!-- Collapsible Expanders (No Tabs) -->
+                    <div style="overflow-y: auto; flex-grow: 1; padding: 24px; display: flex; flex-direction: column; gap: 12px;">
+                        <details class="expander" open>
+                            <summary class="expander-summary">📝 Tailored Executive Recommendation</summary>
+                            <div class="expander-content">
+                                <p id="fit-summary-text" style="color: var(--text-main); font-size: 15px; margin: 0;"></p>
+                            </div>
+                        </details>
+                        
+                        <details class="expander">
+                            <summary class="expander-summary">✉️ Optimized Cover Letter</summary>
+                            <div class="expander-content">
+                                <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                                    <button class="copy-btn" style="margin-top: 0;" id="copy-cl-btn">Copy Text</button>
+                                </div>
+                                <pre id="cover-letter-text" style="white-space: pre-wrap; color: var(--text-main); font-family: inherit; font-size: 14px; margin: 0; background: rgba(0, 0, 0, 0.2); padding: 16px; border-radius: 8px; border: 1px solid var(--border-color);"></pre>
+                            </div>
+                        </details>
+
+                        <details class="expander">
+                            <summary class="expander-summary">🔧 Resume Update Suggestions</summary>
+                            <div class="expander-content">
+                                <div class="suggestions-list" id="suggestions-list-container">
+                                    <!-- suggestions go here -->
+                                </div>
+                            </div>
+                        </details>
+
+                        <details class="expander">
+                            <summary class="expander-summary">💬 Interview Prep Q&A</summary>
+                            <div class="expander-content">
+                                <div class="interview-list" id="interview-list-container">
+                                    <!-- interview questions go here -->
+                                </div>
+                            </div>
+                        </details>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedJob = null;
+        let jobListings = [];
+
+        const jobTitleInput = document.getElementById('job-title-input');
+        const searchBtn = document.getElementById('search-btn');
+        const jobsListContainer = document.getElementById('jobs-list-container');
+        const jobCountBadge = document.getElementById('job-count-badge');
+
+        const tailorEmptyState = document.getElementById('tailor-empty-state');
+        const tailorInputView = document.getElementById('tailor-input-view');
+        const tailorLoadingView = document.getElementById('tailor-loading-view');
+        const tailorResultView = document.getElementById('tailor-result-view');
+
+        const jobDetailTitle = document.getElementById('job-detail-title');
+        const jobDetailCompany = document.getElementById('job-detail-company');
+        const jobDetailLocation = document.getElementById('job-detail-location');
+        const jobDetailLink = document.getElementById('job-detail-link');
+
+        const notesInput = document.getElementById('notes-input');
+        const optimizeBtn = document.getElementById('optimize-btn');
+
+        // Result view items
+        const scoreText = document.getElementById('score-text');
+        const scoreProgress = document.getElementById('score-progress');
+        const matchScoreTitle = document.getElementById('match-score-title');
+        const fitSummaryText = document.getElementById('fit-summary-text');
+        const coverLetterText = document.getElementById('cover-letter-text');
+        const suggestionsContainer = document.getElementById('suggestions-list-container');
+        const interviewContainer = document.getElementById('interview-list-container');
+        const restartBtn = document.getElementById('restart-btn');
+        const copyClBtn = document.getElementById('copy-cl-btn');
+
+        // Search Jobs Trigger
+        searchBtn.addEventListener('click', performSearch);
+        jobTitleInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        async function performSearch() {
+            const query = jobTitleInput.value.trim();
+            if (!query) return;
+
+            // Update UI state
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = `<div class="spinner" style="width:16px; height:16px; border-width:2px; margin-right:4px;"></div> Searching...`;
+            jobsListContainer.innerHTML = `
+                <div class="loader-wrapper">
+                    <div class="spinner"></div>
+                    <div class="loader-text">Scraping the 35 most recent listings from LinkedIn...</div>
+                </div>
+            `;
+
+            try {
+                const response = await fetch(`/api/jobs?title=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                jobListings = data;
+                jobCountBadge.textContent = `${data.length} found`;
+                renderJobsList();
+            } catch (err) {
+                console.error(err);
+                jobsListContainer.innerHTML = `
+                    <div class="detail-placeholder">
+                        <p style="color:var(--warning)">Failed to fetch jobs. Please verify API is running and try again.</p>
+                    </div>
+                `;
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = `
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    Search Jobs
+                `;
+            }
+        }
+
+        function renderJobsList() {
+            if (jobListings.length === 0) {
+                jobsListContainer.innerHTML = `
+                    <div class="detail-placeholder">
+                        <p>No job listings found for this title.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            jobsListContainer.innerHTML = '';
+            jobListings.forEach((job, idx) => {
+                const card = document.createElement('div');
+                card.className = 'job-card';
+                if (selectedJob && selectedJob.link === job.link) {
+                    card.className += ' active';
+                }
+                card.innerHTML = `
+                    <div class="job-card-title">${escapeHTML(job.title)}</div>
+                    <div class="job-card-company">${escapeHTML(job.company)}</div>
+                    <div class="job-card-meta">
+                        <span>${escapeHTML(job.location)}</span>
+                        <span class="badge-date">${escapeHTML(job.posted_date)}</span>
+                    </div>
+                `;
+                card.addEventListener('click', () => selectJob(job, card));
+                jobsListContainer.appendChild(card);
+            });
+        }
+
+        function selectJob(job, cardElement) {
+            selectedJob = job;
+            
+            // Highlight selected card
+            document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
+            cardElement.classList.add('active');
+
+            // Render inputs panel
+            jobDetailTitle.textContent = job.title;
+            jobDetailCompany.textContent = job.company;
+            jobDetailLocation.textContent = job.location;
+            jobDetailLink.href = job.link;
+
+            tailorEmptyState.classList.add('hidden');
+            tailorResultView.classList.add('hidden');
+            tailorInputView.classList.remove('hidden');
+        }
+
+        // Optimize Button Action
+        optimizeBtn.addEventListener('click', async () => {
+            if (!selectedJob) return;
+
+            tailorInputView.classList.add('hidden');
+            tailorLoadingView.classList.remove('hidden');
+
+            const payload = {
+                job_title: selectedJob.title,
+                job_description: `Position: ${selectedJob.title}\nCompany: ${selectedJob.company}\nLocation: ${selectedJob.location}\nDetails can be found at: ${selectedJob.link}`,
+                resume_text: "",
+                user_notes: notesInput.value
+            };
+
+            try {
+                const response = await fetch('/api/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorDetails = await response.json();
+                    throw new Error(errorDetails.detail || "Server error");
+                }
+
+                const result = await response.json();
+                showResults(result);
+
+            } catch (err) {
+                console.error(err);
+                alert("Agent Error: " + err.message);
+                tailorLoadingView.classList.add('hidden');
+                tailorInputView.classList.remove('hidden');
+            }
+        });
+
+        function showResults(data) {
+            tailorLoadingView.classList.add('hidden');
+            tailorResultView.classList.remove('hidden');
+
+            // Set Match Score
+            const score = data.match_score || 0;
+            scoreText.textContent = `${score}%`;
+            
+            // Circular progress circle mapping (radius 32, circumference 201)
+            const strokeOffset = 201 - (201 * score / 100);
+            scoreProgress.style.strokeDashoffset = strokeOffset;
+
+            // Score Category styling
+            if (score >= 80) {
+                matchScoreTitle.textContent = "Excellent Match";
+                scoreProgress.style.stroke = "var(--success)";
+            } else if (score >= 60) {
+                matchScoreTitle.textContent = "Good Fit";
+                scoreProgress.style.stroke = "var(--warning)";
+            } else {
+                matchScoreTitle.textContent = "Additional Alignment Recommended";
+                scoreProgress.style.stroke = "var(--primary)";
+            }
+
+            // Fill text content
+            fitSummaryText.textContent = data.fit_summary || "No fit summary provided.";
+            coverLetterText.textContent = data.cover_letter || "";
+
+            // Suggestions List
+            suggestionsContainer.innerHTML = '';
+            if (data.resume_suggestions && data.resume_suggestions.length > 0) {
+                data.resume_suggestions.forEach(s => {
+                    const el = document.createElement('div');
+                    el.className = 'suggestion-item';
+                    el.textContent = s;
+                    suggestionsContainer.appendChild(el);
+                });
+            } else {
+                suggestionsContainer.innerHTML = '<div style="color:var(--text-dim)">No suggestions generated.</div>';
+            }
+
+            // Interview Prep
+            interviewContainer.innerHTML = '';
+            if (data.interview_prep && data.interview_prep.length > 0) {
+                data.interview_prep.forEach(q => {
+                    const el = document.createElement('div');
+                    el.className = 'interview-item';
+                    
+                    // Split question from talking points if separator exist
+                    if (q.includes("Question:") || q.includes("Talking points:")) {
+                        el.innerHTML = q.replace("Question:", "<h4>Question:</h4>").replace("Talking points:", "<h4 style='color:var(--primary); margin-top:8px;'>Talking points:</h4>");
+                    } else {
+                        el.textContent = q;
+                    }
+                    interviewContainer.appendChild(el);
+                });
+            } else {
+                interviewContainer.innerHTML = '<div style="color:var(--text-dim)">No interview preparation generated.</div>';
+            }
+
+            // No tab resetting needed since tabs are removed.
+        }
+
+        // Restart configuration
+        restartBtn.addEventListener('click', () => {
+            tailorResultView.classList.add('hidden');
+            tailorInputView.classList.remove('hidden');
+        });
+
+        // Copy Cover Letter
+        copyClBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(coverLetterText.textContent);
+            copyClBtn.textContent = "Copied!";
+            setTimeout(() => {
+                copyClBtn.textContent = "Copy Text";
+            }, 2000);
+        });
+
+        // Safe HTML utility
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>

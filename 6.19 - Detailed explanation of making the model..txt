@@ -1,0 +1,59 @@
+### 1. Detailed Action List
+
+  To accomplish this task, the following changes were planned and executed:
+
+  1. Updated Pydantic Structured Schema:
+      • Modified the  ApplicationStrategy  schema definition in both the Streamlit frontend (app.py) and the FastAPI backend (main.py) / ADK Agent (agent.py) to include:
+        tailored_resume: str = Field(..., description="A rewritten version of the candidate resume, fully optimized to align with the job description keywords")
+
+  2. Updated the Prompt Instructions:
+      • Enhanced prompt templates in both Tab 1 and Tab 2 (in app.py) and in the  /api/apply  API (in main.py) to explicitly instruct Gemini to optimize the candidate's profile/resume,
+      matching job details and keyword specifications, and place it in the  tailored_resume  field.
+  3. Added Input Validation:
+      • Implemented LinkedIn Profile URL validation in Tab 2 ( tab_files ) of app.py:
+        is_valid_linkedin = False
+        if linkedin_url:
+            cleaned_url = linkedin_url.strip().lower()
+            if (cleaned_url.startswith("http://") or cleaned_url.startswith("https://")) and "linkedin.com" in cleaned_url:
+                is_valid_linkedin = True
+
+  4. Conditional Button Enabling:
+      • Updated the  disabled  property of the optimization button ( doc_optimize_btn ) in Tab 2 to grey it out ( disabled=not (is_valid_linkedin and selected_job) ) if a job listing has not been selected
+      from Tab 1 or the LinkedIn Profile URL is empty/invalid.
+      • Replaced general captions with responsive user warnings depending on which condition is missing.
+  5. Graphically Visualized the Code Snippet Box:
+      • Rendered the optimized resume inside a graphical code snippet box using  st.code(res.tailored_resume, language="text")  nested inside a new  st.expander("📄 Tailored Optimized Resume")  container in
+      the results panel for both Tab 1 and Tab 2.
+  6. Restarted the FastAPI Backend:
+      • Re-launched the backend service so that the schema updates are reflected.
+
+  ──────
+  ### 2. Rationale (Why We Did It)
+
+  • Input Validation & UX Safeguard: Restricting the button execution ensures that the model is never invoked with empty parameters. It prevents API failure logs and guides the user cleanly on what input
+  format is expected (e.g., standard  linkedin.com  link).
+  • Consolidated Schema Mapping: Adding  tailored_resume  to  ApplicationStrategy  guarantees that the generated resume conforms to a robust structural template, avoiding loose output formatting bugs.
+  • Improved Presentation: Utilizing  st.code  within a collapsible expander creates a dedicated user interface that lets candidates copy their new resume layout instantly, maintaining design consistency
+  with the Cover Letter box.
+  ──────
+  ### 3. Potential Drawbacks & Mitigations
+
+  #### A. Security Impact
+
+  • Exposure of Profile PII:
+      • Risk: Users entering active LinkedIn URLs and uploading resumes might transmit sensitive Personally Identifiable Information (PII), such as phone numbers, email addresses, and employment history to
+      the model API endpoints.
+      • Mitigation: The application communicates using secure, encrypted HTTPS endpoints to Google GenAI. No profile metadata is cached on permanent storage or shared publicly; the session caches only exist
+      in ephemeral RAM.
+  • URL/Prompt Injection:
+      • Risk: A malicious user could input an injection script inside the LinkedIn URL field or custom notes to hijack model instructions.
+      • Mitigation: Pydantic schema validation forces structured JSON outputs, ensuring that even if there is an injection attempt, the output structure remains restricted to the specified fields.
+
+
+  #### B. Token Burn Impact
+
+  • Increased Output Payload:
+      • Risk: Rewriting an entire resume generates a significantly larger token output (approximately 300 to 700 additional output tokens per generation request). Output tokens are more expensive than input
+      tokens, and this increase causes slightly higher latency.
+      • Mitigation: The app uses a state-aware composite caching layer ( st.session_state.cached_strategies ) that checks if the same combination of inputs has already been generated. If the user clicks
+      optimization multiple times with the same LinkedIn URL, notes, and job, the cached strategy is returned, causing zero repeated token burn.
