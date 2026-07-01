@@ -23,7 +23,7 @@ graph TD
 ```
 
 ### 1. Google Cloud App Hub Registration
-**App Hub** organizes deployed infrastructure into logical applications. Once EasyApplier is deployed to Google Cloud Run, its URL and service boundary are registered as a **Service** and **Workload** under your App Hub Application (`easyapplier` in region `us-east1`, project `ringed-land-397222`).
+**App Hub** organizes deployed infrastructure into logical applications. Once EasyApplier is deployed to Google Cloud Run, its URL and service boundary are registered as a **Service** and **Workload** under your App Hub Application (`easyapplier` in region `us-east1`, project `majestic-lodge-500609-p5`).
 
 ### 2. Structured Agent Outputs (Gemini 2.5)
 Using the official `google-genai` SDK, this agent leverages schema-enforced JSON generation. When analyzing resumes against job descriptions, it forces Gemini to respond strictly matching the `ApplicationStrategy` schema, ensuring absolute reliability and zero output-parsing errors.
@@ -181,21 +181,21 @@ gcloud artifacts repositories create easyapplier-repo `
     --description="Docker repository for easyapplier"
 
 # Build and Tag the Container
-docker build -t us-east1-docker.pkg.dev/ringed-land-397222/easyapplier-repo/easyapplier-agent:latest .
+docker build -t us-east1-docker.pkg.dev/majestic-lodge-500609-p5/easyapplier-repo/easyapplier-agent:latest .
 
 # Push the Container to Google Cloud
-docker push us-east1-docker.pkg.dev/ringed-land-397222/easyapplier-repo/easyapplier-agent:latest
+docker push us-east1-docker.pkg.dev/majestic-lodge-500609-p5/easyapplier-repo/easyapplier-agent:latest
 ```
 
 ### 2. Deploy to Cloud Run
 Deploy the container as a managed server, injecting your API Key as an environment variable:
 ```powershell
 gcloud run deploy easyapplier-service `
-    --image=us-east1-docker.pkg.dev/ringed-land-397222/easyapplier-repo/easyapplier-agent:latest `
+    --image=us-east1-docker.pkg.dev/majestic-lodge-500609-p5/easyapplier-repo/easyapplier-agent:latest `
     --platform=managed `
     --region=us-east1 `
     --allow-unauthenticated `
-    --set-env-vars="GEMINI_API_KEY=your_gemini_api_key_here,GCP_PROJECT_ID=ringed-land-397222,APPHUB_APPLICATION=easyapplier"
+    --set-env-vars="GEMINI_API_KEY=your_gemini_api_key_here,GCP_PROJECT_ID=majestic-lodge-500609-p5,APPHUB_APPLICATION=easyapplier"
 ```
 *(Copy the Service URL outputted after a successful deployment, e.g., `https://easyapplier-service-xxxx-ue.a.run.app`)*
 
