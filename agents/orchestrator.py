@@ -79,7 +79,7 @@ class EasyApplierOrchestrator:
             previous_feedback=None
         )
 
-        print("[ORCHESTRATOR] 🎉 Quality Audit skipped for linear speed optimization.")
+        print("[ORCHESTRATOR] [INFO] Quality Audit skipped for linear speed optimization.")
         
         # Conclude workflow with a static approved AuditResult for model schema compatibility
         final_audit_result = AuditResult(

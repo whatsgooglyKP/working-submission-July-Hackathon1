@@ -28,3 +28,14 @@ class APIOrchestratorResult(BaseModel):
     tailor_output: TailorOutput = Field(..., description="The final tailored application documents from the Tailor Agent")
     audit_history: List[AuditResult] = Field(..., description="The full audit history critiques across all iterations")
     final_audit: AuditResult = Field(..., description="The final Quality Assurance Audit result")
+
+class ResumeTailorRequest(BaseModel):
+    """Request schema for tailoring a resume specifically based on qualifications and user LinkedIn URL."""
+    job_url_or_text: str = Field(..., description="The LinkedIn job posting URL or raw job description text")
+    linkedin_url: str = Field(..., description="The user's LinkedIn profile URL")
+    job_title: Optional[str] = Field(None, description="The title of the job (optional)")
+
+class ResumeTailorResponse(BaseModel):
+    """Response schema containing ONLY the tailored resume."""
+    tailored_resume: str = Field(..., description="The tailored resume in standard clean Markdown format")
+

@@ -3,7 +3,7 @@ import re
 import logging
 import traceback
 from fastapi import APIRouter, HTTPException, status, Response
-from api.schemas import ApplicationRequest, APIOrchestratorResult, ApplicationStrategy
+from api.schemas import ApplicationRequest, APIOrchestratorResult, ApplicationStrategy, ResumeTailorRequest, ResumeTailorResponse
 from api.pdf_generator import generate_strategy_pdf
 from job_scraper import search_linkedin_jobs, get_linkedin_job_description
 from agents.orchestrator import EasyApplierOrchestrator
@@ -417,3 +417,68 @@ async def get_compiled_pdf(payload: PDFGenerationPayload):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"PDF generation failed: {str(e)}"
         )
+
+@router.post("/api/apply/resume", response_model=ResumeTailorResponse)
+async def tailor_resume_endpoint(request: ResumeTailorRequest):
+    """
+    Tailor a resume specifically based on job posting basic/preferred qualifications
+    and matching it to the candidate's LinkedIn URL.
+    Returns ONLY the tailored resume Markdown.
+    """
+    logger.info("Tailoring resume specifically for LinkedIn profile: %s", request.linkedin_url)
+    
+    # Extract candidate profile details
+    profile_details = extract_linkedin_profile_details(request.linkedin_url)
+    default_resume = get_default_candidate_resume()
+    
+    resume_text_to_use = f"""
+    =====================================================
+    EXTRACTED CANDIDATE PROFILE (LINKEDIN URL)
+    =====================================================
+    Full Name: {profile_details['name']}
+    Professional Headline: {profile_details['headline']}
+    Target Location: {profile_details['location']}
+    Inferred Skills & Focus: {", ".join(profile_details['skills'])}
+    
+    =====================================================
+    CANDIDATE BASE RESUME (FALLBACK & EXPERIENCE SOURCE)
+    =====================================================
+    {default_resume}
+    
+    CRITICAL PARSING GUIDELINES:
+    - The candidate's name MUST be parsed as "{profile_details['name']}".
+    - The candidate's summary and location MUST align with "{profile_details['location']}" and headline "{profile_details['headline']}".
+    - Merge the inferred skills ({", ".join(profile_details['skills'])}) into the resume.
+    - Ensure all tailored outputs use "{profile_details['name']}" as the candidate's name.
+    """
+
+    job_description_to_use = request.job_url_or_text
+    link_match = re.search(r'https?://[^\s]+', job_description_to_use)
+    if link_match:
+        try:
+            logger.info("Scraping full LinkedIn job description from URL")
+            scraped_desc = get_linkedin_job_description(link_match.group(0))
+            if scraped_desc:
+                job_description_to_use = scraped_desc
+        except Exception as e:
+            logger.warning("Failed to scrape LinkedIn job description: %s", str(e))
+
+    job_title = request.job_title or "Target Position"
+
+    try:
+        orchestrator = EasyApplierOrchestrator()
+        result = orchestrator.run_workflow(
+            job_title=job_title,
+            raw_job_description=job_description_to_use,
+            raw_resume_text=resume_text_to_use,
+            user_notes="Focus strictly on basic and preferred qualifications to align the resume."
+        )
+        return ResumeTailorResponse(tailored_resume=result.tailor_output.tailored_resume)
+    except Exception as e:
+        tb = traceback.format_exc()
+        logger.error("Resume tailoring failed with exception traceback:\n%s", tb)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Resume tailoring failed: {str(e)}"
+        )
+
