@@ -10,8 +10,13 @@ class ApplicationRequest(BaseModel):
     user_notes: Optional[str] = Field(None, description="Optional extra notes, instructions, or focus areas")
 
 class ApplicationStrategy(BaseModel):
-    """The tailored resume output schema containing only the generated optimized resume."""
+    """The complete tailored career preparation strategy and documents."""
+    match_score: int = Field(..., description="Overall fit score from 1 to 100")
+    fit_summary: str = Field(..., description="A 3-4 sentence summary of why the candidate fits this role")
+    cover_letter: str = Field(..., description="A professional, tailored cover letter based on the job and resume")
     tailored_resume: str = Field(..., description="A rewritten version of the candidate resume, fully optimized in standard clean Markdown format to align with the job description keywords")
+    resume_suggestions: List[str] = Field(..., description="Bullet points suggesting specific updates to the resume to align with keywords")
+    interview_prep: List[str] = Field(..., description="Top 3 likely interview questions with suggested talking points")
 
 class APIOrchestratorResult(BaseModel):
     """The complete response schema returning the full multi-agent workflow results."""

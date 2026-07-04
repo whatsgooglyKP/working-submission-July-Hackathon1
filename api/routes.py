@@ -2,8 +2,9 @@ import os
 import re
 import logging
 import traceback
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Response
 from api.schemas import ApplicationRequest, APIOrchestratorResult, ApplicationStrategy
+from api.pdf_generator import generate_strategy_pdf
 from job_scraper import search_linkedin_jobs, get_linkedin_job_description
 from agents.orchestrator import EasyApplierOrchestrator
 
@@ -26,7 +27,6 @@ def extract_linkedin_profile_details(url: str) -> dict:
             "raw_slug": ""
         }
     
-    import re
     # Extract path portion
     path_part = ""
     if "/in/" in url:
@@ -194,7 +194,7 @@ def get_default_candidate_resume() -> str:
     if profile_parts:
         return "\n\n".join(profile_parts)
     
-    # Static realistic public fallback resume for the system
+    # Static realistic fallback profile for the system
     return """
     Kevin Scott Pinard
     Email: Kevinpolymath@gmail.com
@@ -254,6 +254,28 @@ async def get_linkedin_jobs(title: str, limit: int = 10):
             detail=f"Error scraping LinkedIn jobs: {str(e)}"
         )
 
+@router.get("/api/jobs/description")
+async def get_job_description(url: str):
+    """Retrieves full scraped LinkedIn job description for a given LinkedIn URL."""
+    if not url:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Query parameter 'url' is required."
+        )
+    try:
+        desc = get_linkedin_job_description(url)
+        if not desc:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Could not scrape job description. Make sure the URL is a valid guest LinkedIn job link."
+            )
+        return {"description": desc}
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching job description: {str(e)}"
+        )
+
 @router.post("/api/apply", response_model=ApplicationStrategy)
 async def analyze_application(request: ApplicationRequest):
     """
@@ -262,8 +284,10 @@ async def analyze_application(request: ApplicationRequest):
     2. Candidate Profiler (ResearcherAgent) -> CandidateProfile
     3. Strategic Gap Analysis (StrategistAgent) -> GapAnalysis
     4. Copywriting Tailor (TailorAgent) -> TailorOutput
-    5. Quality Audit Review (StrategistAgent) -> AuditResult
-    6. Iterates drafting based on audit critiques as necessary.
+    
+    This fully evaluates candidate fit and generates highly optimized
+    application strategies, tailored resumes, customized cover letters, 
+    and target interview prep questions.
     """
     logger.info("Starting Multi-Agent Orchestrator workflow for job: %s", request.job_title)
 
@@ -312,72 +336,36 @@ async def analyze_application(request: ApplicationRequest):
             logger.info("Scraping full LinkedIn job description from URL")
             scraped_desc = get_linkedin_job_description(link_match.group(0))
             if scraped_desc:
-                job_description_to_use = f"{job_description_to_use}\n\n=== SCRAPED FULL DESCRIPTION ===\n{scraped_desc}"
+                job_description_to_use = scraped_desc
         except Exception as e:
             logger.warning("Failed to scrape LinkedIn job description: %s", str(e))
 
     try:
-        # High-Speed Single-Call optimization for maximum performance
-        logger.info("Initializing high-speed single-call Gemini engine for resume tailoring")
-        from agents.base import get_gemini_client
-        from google.genai import types
-        
-        client = get_gemini_client()
-        
-        FAST_RESUME_PROMPT = """
-You are an Elite Resume Writer and Professional Career Copywriter.
-Your goal is to perform a detailed comparison and alignment check, and craft a 100% complete, submission-ready, highly tailored resume.
-
-========================================================================
-CORE MANDATE: SUBMISSION-READY TAILORED RESUME (NO TEMPLATES OR PLACEHOLDERS)
-- In the `tailored_resume` field, rewrite the candidate's resume/profile to create a fully tailored, optimized resume in standard clean Markdown.
-- This resume must be 100% COMPLETE and ready to be submitted.
-- There must be absolutely NO placeholders, incomplete sections, or templates (like '[insert project]', 'your.email@example.com', or 'kevin.pinard@email.com').
-- You MUST use the actual candidate details provided in the profile:
-  * Full Name: Kevin Scott Pinard
-  * Email Address: Kevinpolymath@gmail.com
-  * Phone Number: 352-406-3847
-  * Portfolio Links: LinkedIn (https://www.linkedin.com/in/pinardkevin), GitHub (https://github.com/kevinpolymath), Tableau
-  * Location: Orlando, FL
-- Carefully verify and incorporate these exact real details in the tailored resume.
-
-========================================================================
-OUTPUT FORMAT:
-Ensure you populate all fields of the response schema:
-1. `tailored_resume`: The complete, gorgeous, fully rewritten tailored resume in clean Markdown.
-"""
-
-        prompt = f"""
-        Role to tailor for: "{request.job_title}"
-        
-        --- TARGET JOB DETAILS ---
-        {job_description_to_use}
-        
-        --- RAW CANDIDATE PROFILE ---
-        {resume_text_to_use}
-        """
-
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=FAST_RESUME_PROMPT.strip(),
-                response_mime_type="application/json",
-                response_schema=ApplicationStrategy,
-                temperature=0.3,
-            )
+        # Run the official Multi-Agent Orchestrator
+        logger.info("Running parallelized EasyApplier Multi-Agent suite...")
+        orchestrator = EasyApplierOrchestrator()
+        result = orchestrator.run_workflow(
+            job_title=request.job_title,
+            raw_job_description=job_description_to_use,
+            raw_resume_text=resume_text_to_use,
+            user_notes=request.user_notes
         )
         
-        if response.parsed:
-            logger.info("High-speed resume tailoring engine succeeded")
-            return response.parsed
-            
-        raise ValueError("High-speed resume tailoring engine failed to produce valid parsed output.")
+        # Map OrchestratorResult into ApplicationStrategy
+        mapped_strategy = ApplicationStrategy(
+            match_score=result.gap_analysis.match_score,
+            fit_summary=result.gap_analysis.fit_summary,
+            cover_letter=result.tailor_output.cover_letter,
+            tailored_resume=result.tailor_output.tailored_resume,
+            resume_suggestions=result.gap_analysis.gap_areas,
+            interview_prep=result.tailor_output.interview_prep
+        )
+        
+        return mapped_strategy
 
     except Exception as e:
-        # Format and log full traceback explicitly using traceback module
         tb = traceback.format_exc()
-        logger.error("High-speed workflow failed with exception traceback:\n%s", tb)
+        logger.error("Multi-Agent workflow failed with exception traceback:\n%s", tb)
         
         err_msg = str(e).upper()
         if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg or "RATE_LIMIT" in err_msg:
@@ -388,5 +376,44 @@ Ensure you populate all fields of the response schema:
             
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Resume tailoring execution failed: {str(e)}"
+            detail=f"Multi-Agent execution failed: {str(e)}"
+        )
+
+from pydantic import BaseModel, Field
+
+class PDFGenerationPayload(BaseModel):
+    strategy: ApplicationStrategy
+    job_title: str
+    company: str
+    linkedin_url: str
+
+@router.post("/api/apply/pdf")
+async def get_compiled_pdf(payload: PDFGenerationPayload):
+    """
+    Compiles the tailored resume, cover letter, alignment score, suggestions,
+    and interview prep into a premium, beautifully formatted multi-page PDF career dossier.
+    """
+    logger.info("Compiling tailored Career Path dossier PDF for: %s", payload.job_title)
+    try:
+        pdf_bytes = generate_strategy_pdf(
+            res=payload.strategy,
+            job_title=payload.job_title,
+            company=payload.company,
+            linkedin_url=payload.linkedin_url
+        )
+        
+        filename = f"EasyApplier_Tailored_Career_Package_{payload.company.replace(' ', '_')}.pdf"
+        
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}"
+            }
+        )
+    except Exception as e:
+        logger.error("Failed compiling PDF package: %s", str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"PDF generation failed: {str(e)}"
         )

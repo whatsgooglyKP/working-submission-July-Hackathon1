@@ -21,6 +21,7 @@
             --text-dim: #6b7280;
             --success: #10b981;
             --warning: #f59e0b;
+            --danger: #ef4444;
         }
 
         * {
@@ -79,9 +80,9 @@
             gap: 8px;
             padding: 6px 16px;
             border-radius: 20px;
-            background: rgba(245, 158, 11, 0.1);
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            color: var(--warning);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success);
             font-size: 13px;
             font-weight: 600;
         }
@@ -90,50 +91,53 @@
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: var(--warning);
-            box-shadow: 0 0 10px var(--warning);
+            background-color: var(--success);
+            box-shadow: 0 0 10px var(--success);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(245, 158, 11, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
         }
 
         .container {
-            max-width: 1400px;
-            margin: 40px auto;
-            padding: 0 20px;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
         }
 
-        /* Search Section */
+        /* Search Module */
         .search-wrapper {
             background: var(--bg-surface);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 30px;
+            padding: 32px;
             backdrop-filter: blur(16px);
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px 0 rgba(66, 133, 244, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
         }
 
         .search-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 8px;
             font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.3px;
         }
 
         .search-subtitle {
-            color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 20px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
         }
 
         .search-form {
             display: flex;
-            gap: 12px;
+            gap: 16px;
         }
 
         .input-group {
@@ -147,7 +151,7 @@
             background: rgba(0, 0, 0, 0.3);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            color: var(--text-main);
+            color: #fff;
             font-family: inherit;
             font-size: 15px;
             transition: all 0.3s;
@@ -156,47 +160,44 @@
         .search-input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 4px var(--border-glow);
-            background: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 0 3px var(--border-glow);
         }
 
         .btn {
-            padding: 16px 28px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: #fff;
             border: none;
             border-radius: 10px;
-            color: white;
-            font-family: inherit;
+            padding: 0 28px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 14px 0 var(--primary-glow);
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px var(--primary-glow);
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px 0 var(--primary-glow);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+            filter: brightness(1.1);
         }
 
-        .btn:active {
-            transform: translateY(0);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
-        /* Dashboard Grid */
+        /* Grid Layout */
         .dashboard-grid {
             display: grid;
-            grid-template-columns: 1fr 1.3fr;
-            gap: 30px;
-            min-height: 600px;
-        }
-
-        @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
+            grid-template-columns: 4fr 8fr;
+            gap: 32px;
+            align-items: start;
         }
 
         .panel {
@@ -208,6 +209,7 @@
             flex-direction: column;
             overflow: hidden;
             box-shadow: 0 8px 32px 0 rgba(66, 133, 244, 0.08);
+            min-height: 600px;
         }
 
         .panel-header {
@@ -427,27 +429,29 @@
         .match-score-container {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
             background: rgba(99, 102, 241, 0.05);
             border: 1px solid var(--border-glow);
-            padding: 16px;
+            padding: 20px;
             border-radius: 12px;
-            margin-bottom: 10px;
+            margin: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
 
         .match-score-circle {
             position: relative;
-            width: 70px;
-            height: 70px;
+            width: 76px;
+            height: 76px;
             display: flex;
             justify-content: center;
             align-items: center;
+            flex-shrink: 0;
         }
 
         .match-score-svg {
             transform: rotate(-90deg);
-            width: 70px;
-            height: 70px;
+            width: 76px;
+            height: 76px;
         }
 
         .match-score-bg {
@@ -461,28 +465,34 @@
             stroke: var(--primary);
             stroke-width: 6;
             stroke-linecap: round;
-            stroke-dasharray: 201; /* 2 * PI * r (r=32) */
-            stroke-dashoffset: 201;
+            stroke-dasharray: 220; /* 2 * PI * r (r=35) approx 220 */
+            stroke-dashoffset: 220;
             transition: stroke-dashoffset 1s ease-out;
         }
 
         .match-score-value {
             position: absolute;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #fff;
             font-family: 'Outfit', sans-serif;
         }
 
+        .match-text {
+            flex-grow: 1;
+        }
+
         .match-text h4 {
             font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #fff;
         }
 
         .match-text p {
-            font-size: 13px;
+            font-size: 13.5px;
             color: var(--text-muted);
+            line-height: 1.5;
         }
 
         /* Results view elements */
@@ -499,7 +509,6 @@
             gap: 6px;
             cursor: pointer;
             transition: all 0.2s;
-            margin-top: 12px;
         }
 
         .copy-btn:hover {
@@ -507,24 +516,32 @@
             border-color: var(--text-muted);
         }
 
+        .copy-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
         .suggestions-list, .interview-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 14px;
         }
 
         .suggestion-item, .interview-item {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--border-color);
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 14.5px;
+            line-height: 1.6;
         }
 
         .interview-item h4 {
-            color: var(--accent);
-            margin-bottom: 6px;
-            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 15px;
+            font-family: 'Outfit', sans-serif;
         }
 
         /* Loading spinner */
@@ -555,6 +572,9 @@
             font-size: 14px;
             color: var(--text-muted);
             animation: pulseText 1.5s ease-in-out infinite;
+            text-align: center;
+            max-width: 320px;
+            line-height: 1.5;
         }
 
         @keyframes pulseText {
@@ -578,59 +598,22 @@
             background: var(--text-dim);
         }
 
-        /* Expander / Details styling */
-        .expander {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            overflow: hidden;
-            transition: border-color 0.3s;
-            margin-bottom: 12px;
-        }
-
-        .expander[open] {
-            border-color: var(--primary-glow);
-        }
-
-        .expander-summary {
-            padding: 14px 20px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            user-select: none;
-            outline: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: var(--text-main);
-            background: rgba(255, 255, 255, 0.02);
-            list-style: none; /* Hide default arrow */
-        }
-        
-        .expander-summary::-webkit-details-marker {
-            display: none; /* Hide default arrow in Safari */
-        }
-
-        .expander-summary::after {
-            content: '▼';
-            font-size: 10px;
-            color: var(--text-muted);
-            transition: transform 0.3s;
-        }
-
-        .expander[open] .expander-summary::after {
-            transform: rotate(180deg);
-        }
-
-        .expander-content {
-            padding: 20px;
-            border-top: 1px solid var(--border-color);
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        /* Utility classes */
-        .hidden {
-            display: none !important;
+        /* Markdown code format block */
+        .markdown-pre {
+            white-space: pre-wrap; 
+            color: var(--text-main); 
+            font-family: 'Courier New', Courier, monospace; 
+            font-size: 13.5px; 
+            margin: 0; 
+            background: rgba(0, 0, 0, 0.45); 
+            padding: 24px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color); 
+            line-height: 1.6; 
+            min-height: 350px; 
+            max-height: 500px; 
+            overflow-y: auto; 
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
         }
     </style>
 </head>
@@ -731,31 +714,89 @@
                 <!-- Loading View -->
                 <div class="loader-wrapper hidden" id="tailor-loading-view">
                     <div class="spinner"></div>
-                    <div class="loader-text">Analyzing job requirements and resume...</div>
+                    <div class="loader-text" id="loader-status-text">Initiating multi-agent system: launching research, strategic matching, and drafting...</div>
                 </div>
 
                 <!-- Result View -->
                 <div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;" class="hidden" id="tailor-result-view">
+                    <!-- Results Header -->
                     <div style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
                         <div>
-                            <h3 style="font-size: 18px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">Tailored Resume Ready</h3>
-                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Your resume has been perfectly optimized for this role.</p>
+                            <h3 style="font-size: 18px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">AI Tailoring Complete</h3>
+                            <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Every single document has been prepared for submission.</p>
                         </div>
-                        <button class="copy-btn" id="restart-btn" style="margin-top: 0; align-self: center;">
-                            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
-                            Back to configuration
-                        </button>
-                    </div>
-
-                    <div style="overflow-y: auto; flex-grow: 1; padding: 24px; display: flex; flex-direction: column; gap: 16px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Tailored Optimized Resume (Markdown)</span>
-                            <button class="copy-btn" style="margin-top: 0; background: var(--primary); border: none; color: white;" id="copy-resume-btn">
-                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                                Copy Resume
+                        <div style="display: flex; gap: 10px;">
+                            <button class="copy-btn" id="download-pdf-btn" style="margin-top: 0; background: var(--success); border: none; color: white;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download Dossier (.pdf)
+                            </button>
+                            <button class="copy-btn" id="restart-btn" style="margin-top: 0;">
+                                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                                Back
                             </button>
                         </div>
-                        <pre id="tailored-resume-text" style="white-space: pre-wrap; color: var(--text-main); font-family: 'Courier New', Courier, monospace; font-size: 14px; margin: 0; background: rgba(0, 0, 0, 0.4); padding: 24px; border-radius: 12px; border: 1px solid var(--border-color); line-height: 1.6; min-height: 400px; max-height: 550px; overflow-y: auto; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5);"></pre>
+                    </div>
+
+                    <!-- ATS Match Widget & Summary -->
+                    <div class="match-score-container">
+                        <div class="match-score-circle">
+                            <svg class="match-score-svg">
+                                <circle class="match-score-bg" cx="38" cy="38" r="32"></circle>
+                                <circle id="match-score-progress" class="match-score-progress" cx="38" cy="38" r="32"></circle>
+                            </svg>
+                            <span class="match-score-value" id="match-score-num">0%</span>
+                        </div>
+                        <div class="match-text">
+                            <h4>Executive Recommendation</h4>
+                            <p id="fit-summary-text">Fit summary loads here...</p>
+                        </div>
+                    </div>
+
+                    <!-- Tab Buttons -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab="tab-resume">Optimized Resume</button>
+                        <button class="tab-btn" data-tab="tab-coverletter">Cover Letter</button>
+                        <button class="tab-btn" data-tab="tab-suggestions">ATS Gap Suggestions</button>
+                        <button class="tab-btn" data-tab="tab-interview">Interview Prep</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div style="overflow-y: auto; flex-grow: 1; min-height: 400px;">
+                        <!-- Resume Tab -->
+                        <div id="tab-resume" class="tab-content active">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Tailored Resume (Markdown)</span>
+                                <button class="copy-btn" style="margin-top: 0; background: var(--primary); border: none; color: white;" id="copy-resume-btn">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                    Copy Resume
+                                </button>
+                            </div>
+                            <pre id="tailored-resume-text" class="markdown-pre"></pre>
+                        </div>
+
+                        <!-- Cover Letter Tab -->
+                        <div id="tab-coverletter" class="tab-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Targeted Cover Letter (Markdown)</span>
+                                <button class="copy-btn" style="margin-top: 0; background: var(--primary); border: none; color: white;" id="copy-cover-btn">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                                    Copy Letter
+                                </button>
+                            </div>
+                            <pre id="cover-letter-text" class="markdown-pre"></pre>
+                        </div>
+
+                        <!-- Suggestions Tab -->
+                        <div id="tab-suggestions" class="tab-content">
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px;">Key Recommendations to Address Identified Gaps:</div>
+                            <div class="suggestions-list" id="suggestions-container"></div>
+                        </div>
+
+                        <!-- Interview Tab -->
+                        <div id="tab-interview" class="tab-content">
+                            <div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px;">Likely Interview Questions & Suggested Talking Points:</div>
+                            <div class="interview-list" id="interview-container"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -765,6 +806,7 @@
     <script>
         let selectedJob = null;
         let jobListings = [];
+        let lastStrategyResult = null; // caches rich multi-agent result for PDF downloads
 
         const jobTitleInput = document.getElementById('job-title-input');
         const searchBtn = document.getElementById('search-btn');
@@ -775,6 +817,7 @@
         const tailorInputView = document.getElementById('tailor-input-view');
         const tailorLoadingView = document.getElementById('tailor-loading-view');
         const tailorResultView = document.getElementById('tailor-result-view');
+        const loaderStatusText = document.getElementById('loader-status-text');
 
         const jobInfoPreview = document.getElementById('job-info-preview');
         const jobDetailTitle = document.getElementById('job-detail-title');
@@ -788,8 +831,17 @@
 
         // Result view items
         const restartBtn = document.getElementById('restart-btn');
+        const downloadPdfBtn = document.getElementById('download-pdf-btn');
         const copyResumeBtn = document.getElementById('copy-resume-btn');
+        const copyCoverBtn = document.getElementById('copy-cover-btn');
         const tailoredResumeText = document.getElementById('tailored-resume-text');
+        const coverLetterText = document.getElementById('cover-letter-text');
+        const suggestionsContainer = document.getElementById('suggestions-container');
+        const interviewContainer = document.getElementById('interview-container');
+
+        const matchScoreNum = document.getElementById('match-score-num');
+        const matchScoreProgress = document.getElementById('match-score-progress');
+        const fitSummaryText = document.getElementById('fit-summary-text');
 
         // Search Jobs Trigger
         searchBtn.addEventListener('click', performSearch);
@@ -902,6 +954,7 @@
 
             tailorInputView.classList.add('hidden');
             tailorLoadingView.classList.remove('hidden');
+            loaderStatusText.innerHTML = `Running EasyApplier Multi-Agent suite...<br><span style="font-size: 11.5px; opacity:0.8; display:inline-block; margin-top:8px;">1. Scrapes full job specification<br>2. Synthesizes LinkedIn candidate profile<br>3. Computes ATS alignments & gaps<br>4. Formulates tailored cover letters & resumes</span>`;
 
             let jobTitle = "Inferred from URL";
             if (selectedJob && selectedJob.link === jobSource) {
@@ -928,6 +981,7 @@
                 }
 
                 const result = await response.json();
+                lastStrategyResult = result; // cache results
                 showResults(result);
 
             } catch (err) {
@@ -942,8 +996,91 @@
             tailorLoadingView.classList.add('hidden');
             tailorResultView.classList.remove('hidden');
 
+            // Populate text content
             tailoredResumeText.textContent = data.tailored_resume || "";
+            coverLetterText.textContent = data.cover_letter || "";
+            fitSummaryText.textContent = data.fit_summary || "";
+
+            // Populate Score
+            const score = data.match_score || 0;
+            matchScoreNum.textContent = `${score}%`;
+            // Circle radius is 35, circumference is ~220
+            const offset = 220 - (220 * score) / 100;
+            matchScoreProgress.style.strokeDashoffset = offset;
+
+            // Set progress stroke color based on score
+            if (score >= 80) {
+                matchScoreProgress.style.stroke = 'var(--success)';
+            } else if (score >= 60) {
+                matchScoreProgress.style.stroke = 'var(--warning)';
+            } else {
+                matchScoreProgress.style.stroke = 'var(--danger)';
+            }
+
+            // Populate Suggestions list
+            suggestionsContainer.innerHTML = "";
+            if (data.resume_suggestions && data.resume_suggestions.length > 0) {
+                data.resume_suggestions.forEach(sug => {
+                    const div = document.createElement('div');
+                    div.className = "suggestion-item";
+                    div.textContent = sug;
+                    suggestionsContainer.appendChild(div);
+                });
+            } else {
+                suggestionsContainer.innerHTML = `<div class="detail-placeholder" style="padding:40px;"><p>No gaps identified. Resume aligns fully!</p></div>`;
+            }
+
+            // Populate Interview list
+            interviewContainer.innerHTML = "";
+            if (data.interview_prep && data.interview_prep.length > 0) {
+                data.interview_prep.forEach(prep => {
+                    const div = document.createElement('div');
+                    div.className = "interview-item";
+                    
+                    // Format Q & A block
+                    const parts = prep.split('\n');
+                    let questionHtml = "<h4>Interview Question</h4>";
+                    let contentLines = [];
+                    parts.forEach(l => {
+                        const cleanL = l.trim();
+                        if (cleanL.toLowerCase().startsWith('question:') || cleanL.toLowerCase().startsWith('q:')) {
+                            questionHtml = `<h4>${escapeHTML(cleanL)}</h4>`;
+                        } else {
+                            if (cleanL) contentLines.push(escapeHTML(cleanL));
+                        }
+                    });
+
+                    div.innerHTML = `
+                        ${questionHtml}
+                        <p>${contentLines.join('<br>')}</p>
+                    `;
+                    interviewContainer.appendChild(div);
+                });
+            } else {
+                interviewContainer.innerHTML = `<div class="detail-placeholder" style="padding:40px;"><p>No targeted prep questions generated.</p></div>`;
+            }
+
+            // Default back to first tab (Resume)
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.querySelector('[data-tab="tab-resume"]').classList.add('active');
+            document.getElementById('tab-resume').classList.add('active');
         }
+
+        // Tab Switching Logic
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTabId = btn.getAttribute('data-tab');
+                
+                // Toggle active buttons
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Toggle active content divs
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(targetTabId).classList.add('active');
+            });
+        });
 
         // Restart configuration
         restartBtn.addEventListener('click', () => {
@@ -951,20 +1088,72 @@
             tailorInputView.classList.remove('hidden');
         });
 
-        // Copy Tailored Resume
-        copyResumeBtn.addEventListener('click', () => {
-            navigator.clipboard.writeText(tailoredResumeText.textContent);
-            copyResumeBtn.innerHTML = `
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                Copied!
+        // Download dossier PDF
+        downloadPdfBtn.addEventListener('click', async () => {
+            if (!lastStrategyResult) return;
+
+            downloadPdfBtn.disabled = true;
+            downloadPdfBtn.innerHTML = `
+                <div class="spinner" style="width:14px; height:14px; border-width:2px; margin-right:4px;"></div>
+                Compiling...
             `;
-            setTimeout(() => {
-                copyResumeBtn.innerHTML = `
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
-                    Copy Resume
+
+            try {
+                const payload = {
+                    strategy: lastStrategyResult,
+                    job_title: selectedJob ? selectedJob.title : "Target Position",
+                    company: selectedJob ? selectedJob.company : "Target Company",
+                    linkedin_url: resumeInput.value.trim()
+                };
+
+                const response = await fetch('/api/apply/pdf', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to compile strategy dossier PDF package.");
+                }
+
+                const blob = await response.blob();
+                const downloadUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = `EasyApplier_Tailored_Career_Package_${payload.company.replace(/\s+/g, '_')}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+            } catch (err) {
+                console.error(err);
+                alert("PDF Download Error: " + err.message);
+            } finally {
+                downloadPdfBtn.disabled = false;
+                downloadPdfBtn.innerHTML = `
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download Dossier (.pdf)
                 `;
-            }, 2000);
+            }
         });
+
+        // Copy Clipboard Helper
+        function setupCopyButton(btn, textElement) {
+            btn.addEventListener('click', () => {
+                navigator.clipboard.writeText(textElement.textContent);
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = `
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    Copied!
+                `;
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                }, 2000);
+            });
+        }
+
+        setupCopyButton(copyResumeBtn, tailoredResumeText);
+        setupCopyButton(copyCoverBtn, coverLetterText);
 
         // Safe HTML utility
         function escapeHTML(str) {
