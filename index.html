@@ -1,1209 +1,781 @@
 <!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>EasyApplier — Resume Tailoring Agent</title>
-				<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-					<style>
-						:root {
-						--bg-base: #080b10;
-						--bg-surface: rgba(18, 22, 33, 0.7);
-						--bg-card: rgba(26, 32, 48, 0.4);
-						--border-color: rgba(255, 255, 255, 0.08);
-						--border-glow: rgba(99, 102, 241, 0.2);
-						--primary: #4285F4;
-						--primary-hover: #357ae8;
-						--primary-glow: rgba(66, 133, 244, 0.4);
-						--accent: #4285F4;
-						--text-main: #f3f4f6;
-						--text-muted: #9ca3af;
-						--text-dim: #6b7280;
-						--success: #10b981;
-						--warning: #f59e0b;
-						--danger: #ef4444;
-						}
-
-						* {
-						box-sizing: border-box;
-						margin: 0;
-						padding: 0;
-						}
-
-						body {
-						font-family: 'Plus Jakarta Sans', sans-serif;
-						background-color: var(--bg-base);
-						color: var(--text-main);
-						overflow-x: hidden;
-						background-image:
-						radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
-						radial-gradient(circle at 90% 80%, rgba(6, 118, 212, 0.08) 0%, transparent 40%);
-						background-attachment: fixed;
-						min-height: 100vh;
-						}
-
-						.navbar {
-						display: flex;
-						justify-content: space-between;
-						align-items: center;
-						padding: 20px 40px;
-						border-bottom: 1px solid var(--border-color);
-						background: rgba(8, 11, 16, 0.8);
-						backdrop-filter: blur(12px);
-						position: sticky;
-						top: 0;
-						z-index: 100;
-						}
-
-						.brand {
-						display: flex;
-						align-items: center;
-						gap: 12px;
-						font-family: 'Outfit', sans-serif;
-						font-size: 24px;
-						font-weight: 700;
-						letter-spacing: -0.5px;
-						background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
-						-webkit-background-clip: text;
-						-webkit-text-fill-color: transparent;
-						}
-
-						.brand span {
-						background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-						-webkit-background-clip: text;
-						-webkit-text-fill-color: transparent;
-						}
-
-						.status-badge {
-						display: flex;
-						align-items: center;
-						gap: 8px;
-						padding: 6px 16px;
-						border-radius: 20px;
-						background: rgba(16, 185, 129, 0.1);
-						border: 1px solid rgba(16, 185, 129, 0.2);
-						color: var(--success);
-						font-size: 13px;
-						font-weight: 600;
-						}
-
-						.status-dot {
-						width: 8px;
-						height: 8px;
-						border-radius: 50%;
-						background-color: var(--success);
-						box-shadow: 0 0 10px var(--success);
-						animation: pulse 2s infinite;
-						}
-
-						@keyframes pulse {
-						0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-						70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-						100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-						}
-
-						.container {
-						max-width: 1300px;
-						margin: 0 auto;
-						padding: 40px;
-						display: flex;
-						flex-direction: column;
-						gap: 32px;
-						}
-
-						/* Search Module */
-						.search-wrapper {
-						background: var(--bg-surface);
-						border: 1px solid var(--border-color);
-						border-radius: 16px;
-						padding: 32px;
-						backdrop-filter: blur(16px);
-						box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
-						}
-
-						.search-title {
-						font-family: 'Outfit', sans-serif;
-						font-size: 22px;
-						font-weight: 700;
-						margin-bottom: 8px;
-						letter-spacing: -0.3px;
-						}
-
-						.search-subtitle {
-						font-size: 14px;
-						color: var(--text-muted);
-						margin-bottom: 24px;
-						}
-
-						.search-form {
-						display: flex;
-						gap: 16px;
-						}
-
-						.input-group {
-						flex-grow: 1;
-						position: relative;
-						}
-
-						.search-input {
-						width: 100%;
-						padding: 16px 20px;
-						background: rgba(0, 0, 0, 0.3);
-						border: 1px solid var(--border-color);
-						border-radius: 10px;
-						color: #fff;
-						font-family: inherit;
-						font-size: 15px;
-						transition: all 0.3s;
-						}
-
-						.search-input:focus {
-						outline: none;
-						border-color: var(--primary);
-						box-shadow: 0 0 0 3px var(--border-glow);
-						}
-
-						.btn {
-						background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-						color: #fff;
-						border: none;
-						border-radius: 10px;
-						padding: 0 28px;
-						font-size: 15px;
-						font-weight: 600;
-						cursor: pointer;
-						display: inline-flex;
-						align-items: center;
-						gap: 10px;
-						transition: all 0.3s;
-						box-shadow: 0 4px 15px var(--primary-glow);
-						}
-
-						.btn:hover {
-						transform: translateY(-1px);
-						box-shadow: 0 6px 20px var(--primary-glow);
-						filter: brightness(1.1);
-						}
-
-						.btn:disabled {
-						opacity: 0.6;
-						cursor: not-allowed;
-						transform: none;
-						box-shadow: none;
-						}
-
-						/* Grid Layout */
-						.dashboard-grid {
-						display: grid;
-						grid-template-columns: 4fr 8fr;
-						gap: 32px;
-						align-items: start;
-						}
-
-						.panel {
-						background: var(--bg-surface);
-						border: 1px solid var(--border-color);
-						border-radius: 16px;
-						backdrop-filter: blur(16px);
-						display: flex;
-						flex-direction: column;
-						overflow: hidden;
-						box-shadow: 0 8px 32px 0 rgba(66, 133, 244, 0.08);
-						min-height: 600px;
-						}
-
-						.panel-header {
-						padding: 24px;
-						border-bottom: 1px solid var(--border-color);
-						display: flex;
-						justify-content: space-between;
-						align-items: center;
-						}
-
-						.panel-title {
-						font-size: 18px;
-						font-weight: 600;
-						font-family: 'Outfit', sans-serif;
-						display: flex;
-						align-items: center;
-						gap: 10px;
-						}
-
-						.jobs-list {
-						padding: 20px;
-						overflow-y: auto;
-						max-height: 600px;
-						display: flex;
-						flex-direction: column;
-						gap: 14px;
-						}
-
-						.job-card {
-						background: var(--bg-card);
-						border: 1px solid var(--border-color);
-						border-radius: 12px;
-						padding: 18px;
-						cursor: pointer;
-						transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-						position: relative;
-						overflow: hidden;
-						}
-
-						.job-card::before {
-						content: '';
-						position: absolute;
-						top: 0;
-						left: 0;
-						width: 4px;
-						height: 100%;
-						background: linear-gradient(to bottom, var(--primary), var(--accent));
-						opacity: 0;
-						transition: opacity 0.3s;
-						}
-
-						.job-card:hover {
-						transform: translateX(4px) translateY(-2px);
-						background: rgba(66, 133, 244, 0.05);
-						border-color: rgba(66, 133, 244, 0.3);
-						box-shadow: 0 4px 20px rgba(66, 133, 244, 0.1);
-						}
-
-						.job-card:hover::before {
-						opacity: 1;
-						}
-
-						.job-card.active {
-						background: rgba(66, 133, 244, 0.1);
-						border-color: var(--primary);
-						}
-
-						.job-card.active::before {
-						opacity: 1;
-						}
-
-						.job-card-title {
-						font-size: 15px;
-						font-weight: 600;
-						margin-bottom: 6px;
-						color: var(--text-main);
-						}
-
-						.job-card-company {
-						font-size: 13px;
-						color: var(--text-muted);
-						margin-bottom: 12px;
-						}
-
-						.job-card-meta {
-						display: flex;
-						justify-content: space-between;
-						align-items: center;
-						font-size: 12px;
-						color: var(--text-dim);
-						}
-
-						.badge-date {
-						padding: 2px 8px;
-						border-radius: 4px;
-						background: rgba(255, 255, 255, 0.05);
-						font-size: 11px;
-						}
-
-						/* Detail Panel content */
-						.detail-placeholder {
-						display: flex;
-						flex-direction: column;
-						justify-content: center;
-						align-items: center;
-						padding: 80px 40px;
-						color: var(--text-dim);
-						text-align: center;
-						gap: 16px;
-						flex-grow: 1;
-						}
-
-						.detail-placeholder svg {
-						width: 64px;
-						height: 64px;
-						color: var(--text-dim);
-						}
-
-						.detail-content {
-						padding: 24px;
-						display: flex;
-						flex-direction: column;
-						gap: 20px;
-						overflow-y: auto;
-						max-height: 600px;
-						flex-grow: 1;
-						}
-
-						.detail-section-title {
-						font-size: 14px;
-						text-transform: uppercase;
-						letter-spacing: 1px;
-						color: var(--text-dim);
-						font-weight: 700;
-						margin-bottom: 8px;
-						}
-
-						.resume-textarea {
-						width: 100%;
-						height: 140px;
-						padding: 12px;
-						background: rgba(0, 0, 0, 0.3);
-						border: 1px solid var(--border-color);
-						border-radius: 10px;
-						color: #fff;
-						font-family: inherit;
-						font-size: 13px;
-						resize: none;
-						line-height: 1.5;
-						transition: all 0.3s;
-						}
-
-						.resume-textarea:focus {
-						outline: none;
-						border-color: var(--primary);
-						box-shadow: 0 0 0 3px var(--border-glow);
-						}
-
-						/* Tabs UI */
-						.tabs {
-						display: flex;
-						border-bottom: 1px solid var(--border-color);
-						gap: 8px;
-						padding: 0 24px;
-						background: rgba(0, 0, 0, 0.2);
-						}
-
-						.tab-btn {
-						padding: 16px 12px;
-						background: none;
-						border: none;
-						color: var(--text-muted);
-						font-family: inherit;
-						font-size: 14px;
-						font-weight: 500;
-						cursor: pointer;
-						position: relative;
-						transition: color 0.3s;
-						}
-
-						.tab-btn:hover {
-						color: #fff;
-						}
-
-						.tab-btn.active {
-						color: var(--primary);
-						font-weight: 600;
-						}
-
-						.tab-btn.active::after {
-						content: '';
-						position: absolute;
-						bottom: 0;
-						left: 0;
-						width: 100%;
-						height: 2px;
-						background: var(--primary);
-						}
-
-						.tab-content {
-						padding: 24px;
-						display: none;
-						animation: fadeIn 0.4s ease-out;
-						line-height: 1.6;
-						}
-
-						.tab-content.active {
-						display: block;
-						}
-
-						@keyframes fadeIn {
-						from { opacity: 0; transform: translateY(4px); }
-						to { opacity: 1; transform: translateY(0); }
-						}
-
-						/* Match score widget */
-						.match-score-container {
-						display: flex;
-						align-items: center;
-						gap: 20px;
-						background: rgba(99, 102, 241, 0.05);
-						border: 1px solid var(--border-glow);
-						padding: 20px;
-						border-radius: 12px;
-						margin: 24px;
-						box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-						}
-
-						.match-score-circle {
-						position: relative;
-						width: 76px;
-						height: 76px;
-						display: flex;
-						justify-content: center;
-						align-items: center;
-						flex-shrink: 0;
-						}
-
-						.match-score-svg {
-						transform: rotate(-90deg);
-						width: 76px;
-						height: 76px;
-						}
-
-						.match-score-bg {
-						fill: none;
-						stroke: rgba(255, 255, 255, 0.05);
-						stroke-width: 6;
-						}
-
-						.match-score-progress {
-						fill: none;
-						stroke: var(--primary);
-						stroke-width: 6;
-						stroke-linecap: round;
-						stroke-dasharray: 220; /* 2 * PI * r (r=35) approx 220 */
-						stroke-dashoffset: 220;
-						transition: stroke-dashoffset 1s ease-out;
-						}
-
-						.match-score-value {
-						position: absolute;
-						font-size: 20px;
-						font-weight: 700;
-						color: #fff;
-						font-family: 'Outfit', sans-serif;
-						}
-
-						.match-text {
-						flex-grow: 1;
-						}
-
-						.match-text h4 {
-						font-size: 16px;
-						font-weight: 700;
-						margin-bottom: 6px;
-						color: #fff;
-						}
-
-						.match-text p {
-						font-size: 13.5px;
-						color: var(--text-muted);
-						line-height: 1.5;
-						}
-
-						/* Results view elements */
-						.copy-btn {
-						align-self: flex-start;
-						padding: 8px 16px;
-						font-size: 13px;
-						background: rgba(255, 255, 255, 0.05);
-						border: 1px solid var(--border-color);
-						border-radius: 6px;
-						color: var(--text-main);
-						display: inline-flex;
-						align-items: center;
-						gap: 6px;
-						cursor: pointer;
-						transition: all 0.2s;
-						}
-
-						.copy-btn:hover {
-						background: rgba(255, 255, 255, 0.1);
-						border-color: var(--text-muted);
-						}
-
-						.copy-btn:disabled {
-						opacity: 0.5;
-						cursor: not-allowed;
-						}
-
-						.suggestions-list, .interview-list {
-						display: flex;
-						flex-direction: column;
-						gap: 14px;
-						}
-
-						.suggestion-item, .interview-item {
-						background: rgba(255, 255, 255, 0.02);
-						border: 1px solid var(--border-color);
-						padding: 16px;
-						border-radius: 10px;
-						font-size: 14.5px;
-						line-height: 1.6;
-						}
-
-						.interview-item h4 {
-						color: var(--primary);
-						margin-bottom: 8px;
-						font-weight: 700;
-						font-size: 15px;
-						font-family: 'Outfit', sans-serif;
-						}
-
-						/* Loading spinner */
-						.loader-wrapper {
-						display: flex;
-						flex-direction: column;
-						justify-content: center;
-						align-items: center;
-						padding: 60px;
-						gap: 20px;
-						flex-grow: 1;
-						}
-
-						.spinner {
-						width: 50px;
-						height: 50px;
-						border: 4px solid rgba(99, 102, 241, 0.1);
-						border-top-color: var(--primary);
-						border-radius: 50%;
-						animation: spin 1s linear infinite;
-						}
-
-						@keyframes spin {
-						to { transform: rotate(360deg); }
-						}
-
-						.loader-text {
-						font-size: 14px;
-						color: var(--text-muted);
-						animation: pulseText 1.5s ease-in-out infinite;
-						text-align: center;
-						max-width: 320px;
-						line-height: 1.5;
-						}
-
-						@keyframes pulseText {
-						0%, 100% { opacity: 0.6; }
-						50% { opacity: 1; }
-						}
-
-						/* Scrollbar customisation */
-						::-webkit-scrollbar {
-						width: 6px;
-						height: 6px;
-						}
-						::-webkit-scrollbar-track {
-						background: transparent;
-						}
-						::-webkit-scrollbar-thumb {
-						background: var(--border-color);
-						border-radius: 4px;
-						}
-						::-webkit-scrollbar-thumb:hover {
-						background: var(--text-dim);
-						}
-
-						/* Markdown code format block */
-						.markdown-pre {
-						white-space: pre-wrap;
-						color: var(--text-main);
-						font-family: 'Courier New', Courier, monospace;
-						font-size: 13.5px;
-						margin: 0;
-						background: rgba(0, 0, 0, 0.45);
-						padding: 24px;
-						border-radius: 12px;
-						border: 1px solid var(--border-color);
-						line-height: 1.6;
-						min-height: 350px;
-						max-height: 500px;
-						overflow-y: auto;
-						box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-						}
-					</style>
-				</head>
-	<body>
-		<div class="navbar">
-			<div style="display: flex; align-items: center; gap: 15px;">
-				<img src="/aligned_labs_logo.jpg" alt="Aligned Labs" style="height: 40px; width: auto; object-fit: contain; border: 1px solid var(--border-color);">
-					<div class="brand">
-						Easy<span>Applier</span>
-					</div>
-				</div>
-			<div class="status-badge">
-				<div class="status-dot"></div>
-				<span>FastAPI Agent Online</span>
-			</div>
-		</div>
-
-		<div class="container">
-			<!-- Search Section -->
-			<div class="search-wrapper">
-				<div class="search-title">Search LinkedIn Job Listings</div>
-				<div class="search-subtitle">Pull the 10 most recently posted jobs to start tailoring your resume</div>
-				<div class="search-form">
-					<div class="input-group">
-						<input type="text" id="job-title-input" class="search-input" placeholder="e.g. Python Developer, Machine Learning Engineer...">
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyApplier AI — Career Operations Agent</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-dark: #070a13;
+            --card-bg: rgba(13, 20, 38, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #4f46e5;
+            --primary-glow: rgba(79, 70, 229, 0.4);
+            --secondary: #06b6d4;
+            --secondary-glow: rgba(6, 182, 212, 0.3);
+            --accent: #d946ef;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f1f5f9;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .font-mono {
+            font-family: 'Fira Code', monospace;
+        }
+
+        /* Ambient Glow Backgrounds */
+        .glow-sphere {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(130px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.45;
+        }
+
+        .glow-blue {
+            background: radial-gradient(circle, var(--primary) 0%, rgba(0,0,0,0) 70%);
+            width: 600px;
+            height: 600px;
+            top: -200px;
+            right: -100px;
+        }
+
+        .glow-purple {
+            background: radial-gradient(circle, var(--accent) 0%, rgba(0,0,0,0) 70%);
+            width: 500px;
+            height: 500px;
+            bottom: 10%;
+            left: -150px;
+        }
+
+        .glow-cyan {
+            background: radial-gradient(circle, var(--secondary) 0%, rgba(0,0,0,0) 70%);
+            width: 450px;
+            height: 450px;
+            top: 40%;
+            right: -100px;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-panel:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 40px 0 rgba(79, 70, 229, 0.15);
+        }
+
+        /* Neon Buttons */
+        .btn-neon {
+            background: linear-gradient(135deg, var(--primary) 0%, #312e81 100%);
+            box-shadow: 0 0 15px rgba(79, 70, 229, 0.4);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-neon:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(79, 70, 229, 0.8), 0 0 10px var(--secondary);
+            background: linear-gradient(135deg, #6366f1 0%, var(--primary) 100%);
+        }
+
+        .btn-neon:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        /* Custom Radio Buttons */
+        .job-card {
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .job-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--secondary);
+            transform: scale(1.01);
+        }
+
+        .job-card.selected {
+            background: rgba(79, 70, 229, 0.12);
+            border-color: var(--secondary);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
+        }
+
+        .custom-radio {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .job-card.selected .custom-radio {
+            border-color: var(--secondary);
+            background: var(--secondary);
+        }
+
+        .custom-radio::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--bg-dark);
+            border-radius: 50%;
+            opacity: 0;
+            transition: all 0.2s ease;
+        }
+
+        .job-card.selected .custom-radio::after {
+            opacity: 1;
+        }
+
+        /* Metric Radial Progress */
+        .radial-progress {
+            position: relative;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: conic-gradient(var(--secondary) calc(var(--percent) * 1%), rgba(255, 255, 255, 0.1) 0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.2);
+        }
+
+        .radial-progress::before {
+            content: '';
+            position: absolute;
+            width: 114px;
+            height: 114px;
+            border-radius: 50%;
+            background-color: #0b0f19;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070a13;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Animated grid overlay */
+        .grid-bg {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen">
+    <div class="grid-bg"></div>
+    <div class="glow-sphere glow-blue"></div>
+    <div class="glow-sphere glow-purple"></div>
+    <div class="glow-sphere glow-cyan"></div>
+
+    <!-- Navigation Header -->
+    <header class="relative z-10 border-b border-white/5 bg-slate-950/40 backdrop-blur-lg">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
                 </div>
-					<button type="button" class="btn" id="search-btn">
-						<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-						</svg>
-						Search Jobs
-					</button>
-				</div>
-			</div>
-
-			<!-- Dashboard Grid -->
-			<div class="dashboard-grid">
-				<!-- Left Panel: Job Listings -->
-				<div class="panel">
-					<div class="panel-header">
-						<div class="panel-title">
-							<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-							</svg>
-							Job Postings
-						</div>
-						<span style="font-size: 13px; color: var(--text-muted);" id="job-count-badge">0 found</span>
-					</div>
-
-					<div class="jobs-list" id="jobs-list-container">
-						<div class="detail-placeholder">
-							<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M20.25 14.15v4.25c0 .621-.504 1.125-1.125 1.125H4.875c-.621 0-1.125-.504-1.125-1.125v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.45.258-.717.258H3.75c-.266 0-.523-.093-.717-.258m16.5 0a2.18 2.18 0 01.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m0 0V6.25c0-1.098-.826-1.97-1.922-2.025a47.95 47.95 0 00-6.071 0C5.122 4.28 4.3 5.152 4.3 6.25v.806m9.75 0a48.693 48.693 0 01-6.071 0"></path>
-							</svg>
-							<p>Search a job title to retrieve postings</p>
-						</div>
-					</div>
-				</div>
-
-				<!-- Right Panel: Selection / Application Tailor -->
-				<div class="panel" id="tailor-panel">
-					<div class="panel-header">
-						<div class="panel-title">
-							<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l8.982-11.795m-8.982 6.699l.066-.027m0 0L6 18l.8-6.195m0 0L17 3l3 3-10.187 9.904z"></path>
-							</svg>
-							Resume Tailoring Agent
-						</div>
-					</div>
-
-					<div class="detail-placeholder hidden" id="tailor-empty-state">
-						<svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"></path>
-						</svg>
-						<p>Select a job posting from the left to start configuring the AI optimization</p>
-					</div>
-
-					<!-- Input View -->
-					<div class="detail-content" id="tailor-input-view" style="display: flex; flex-direction: column; gap: 16px;">
-						<div id="job-info-preview" class="hidden" style="background: rgba(255, 255, 255, 0.03); padding: 16px; border-radius: 10px; border: 1px solid var(--border-color);">
-							<h2 style="font-size: 18px; font-weight: 600;" id="job-detail-title">Selected Job</h2>
-							<div style="font-size: 14px; color: var(--text-muted); margin-top: 4px;" id="job-detail-company">Company</div>
-							<div style="font-size: 13px; color: var(--text-dim); margin-top: 2px;" id="job-detail-location">Location</div>
-							<a href="#" target="_blank" id="job-detail-link" class="copy-btn" style="margin-top: 10px; text-decoration: none; display: inline-flex;">
-								<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-								</svg>
-								View Job on LinkedIn
-							</a>
-						</div>
-
-						<div>
-							<div class="detail-section-title">1. Your LinkedIn Profile URL</div>
-							<input type="text" id="resume-input" class="search-input" style="padding: 12px;" placeholder="e.g. https://www.linkedin.com/in/username" value="https://www.linkedin.com/in/pinardkevin">
-								<div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">The AI Agent will scrape and parse this profile to match requirements.</div>
-							</div>
-
-						<div>
-							<div class="detail-section-title">2. Target LinkedIn Job URL (or Description Text)</div>
-							<textarea id="job-description-input" class="resume-textarea" style="height: 120px; padding: 12px;" placeholder="Paste the LinkedIn job posting URL (e.g. https://www.linkedin.com/jobs/view/...) or select a live job from the left..."></textarea>
-							<div style="font-size: 12px; color: var(--text-dim); margin-top: 4px;">Pasted URLs will be scraped live by the background agent.</div>
-						</div>
-
-						<button class="btn" id="optimize-btn" style="width: 100%; justify-content: center; margin-top: 10px;">
-							<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-							</svg>
-							Optimize Resume with Gemini
-						</button>
-					</div>
-
-					<!-- Loading View -->
-					<div class="loader-wrapper hidden" id="tailor-loading-view">
-						<div class="spinner"></div>
-						<div class="loader-text" id="loader-status-text">Initiating multi-agent system: launching research, strategic matching, and drafting...</div>
-					</div>
-
-					<!-- Result View -->
-					<div style="display: flex; flex-direction: column; height: 100%; overflow: hidden;" class="hidden" id="tailor-result-view">
-						<!-- Results Header -->
-						<div style="padding: 24px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
-							<div>
-								<h3 style="font-size: 18px; font-weight: 700; color: #fff; font-family: 'Outfit', sans-serif;">AI Tailoring Complete</h3>
-								<p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Every single document has been prepared for submission.</p>
-							</div>
-							<div style="display: flex; gap: 10px;">
-								<button class="copy-btn" id="download-pdf-btn" style="margin-top: 0; background: var(--success); border: none; color: white;">
-									<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-									</svg>
-									Download Dossier (.pdf)
-								</button>
-								<button class="copy-btn" id="restart-btn" style="margin-top: 0;">
-									<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
-									</svg>
-									Back
-								</button>
-							</div>
-						</div>
-
-						<!-- ATS Match Widget & Summary -->
-						<div class="match-score-container">
-							<div class="match-score-circle">
-								<svg class="match-score-svg">
-									<circle class="match-score-bg" cx="38" cy="38" r="32"></circle>
-									<circle id="match-score-progress" class="match-score-progress" cx="38" cy="38" r="32"></circle>
-								</svg>
-								<span class="match-score-value" id="match-score-num">0%</span>
-							</div>
-							<div class="match-text">
-								<h4>Executive Recommendation</h4>
-								<p id="fit-summary-text">Fit summary loads here...</p>
-							</div>
-						</div>
-
-						<!-- Tab Buttons -->
-						<div class="tabs">
-							<button class="tab-btn active" data-tab="tab-resume">Optimized Resume</button>
-							<button class="tab-btn" data-tab="tab-coverletter">Cover Letter</button>
-							<button class="tab-btn" data-tab="tab-suggestions">ATS Gap Suggestions</button>
-							<button class="tab-btn" data-tab="tab-interview">Interview Prep</button>
-						</div>
-
-						<!-- Tab Contents -->
-						<div style="overflow-y: auto; flex-grow: 1; min-height: 400px;">
-							<!-- Resume Tab -->
-							<div id="tab-resume" class="tab-content active">
-								<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-									<span style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Tailored Resume (Markdown)</span>
-									<button class="copy-btn" style="margin-top: 0; background: var(--primary); border: none; color: white;" id="copy-resume-btn">
-										<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-										</svg>
-										Copy Resume
-									</button>
-								</div>
-								<pre id="tailored-resume-text" class="markdown-pre"></pre>
-							</div>
-
-							<!-- Cover Letter Tab -->
-							<div id="tab-coverletter" class="tab-content">
-								<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-									<span style="font-size: 14px; font-weight: 600; color: var(--text-muted);">Targeted Cover Letter (Markdown)</span>
-									<button class="copy-btn" style="margin-top: 0; background: var(--primary); border: none; color: white;" id="copy-cover-btn">
-										<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-											<path stroke-linecap="round" stroke-linejoin="round" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
-										</svg>
-										Copy Letter
-									</button>
-								</div>
-								<pre id="cover-letter-text" class="markdown-pre"></pre>
-							</div>
-
-							<!-- Suggestions Tab -->
-							<div id="tab-suggestions" class="tab-content">
-								<div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px;">Key Recommendations to Address Identified Gaps:</div>
-								<div class="suggestions-list" id="suggestions-container"></div>
-							</div>
-
-							<!-- Interview Tab -->
-							<div id="tab-interview" class="tab-content">
-								<div style="font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 16px;">Likely Interview Questions & Suggested Talking Points:</div>
-								<div class="interview-list" id="interview-container"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<script>
-			let selectedJob = null;
-			let jobListings = [];
-			let lastStrategyResult = null; // caches rich multi-agent result for PDF downloads
-
-			const jobTitleInput = document.getElementById('job-title-input');
-			const searchBtn = document.getElementById('search-btn');
-			const jobsListContainer = document.getElementById('jobs-list-container');
-			const jobCountBadge = document.getElementById('job-count-badge');
-
-			const tailorEmptyState = document.getElementById('tailor-empty-state');
-			const tailorInputView = document.getElementById('tailor-input-view');
-			const tailorLoadingView = document.getElementById('tailor-loading-view');
-			const tailorResultView = document.getElementById('tailor-result-view');
-			const loaderStatusText = document.getElementById('loader-status-text');
-
-			const jobInfoPreview = document.getElementById('job-info-preview');
-			const jobDetailTitle = document.getElementById('job-detail-title');
-			const jobDetailCompany = document.getElementById('job-detail-company');
-			const jobDetailLocation = document.getElementById('job-detail-location');
-			const jobDetailLink = document.getElementById('job-detail-link');
-
-			const resumeInput = document.getElementById('resume-input');
-			const jobDescriptionInput = document.getElementById('job-description-input');
-			const optimizeBtn = document.getElementById('optimize-btn');
-
-			// Result view items
-			const restartBtn = document.getElementById('restart-btn');
-			const downloadPdfBtn = document.getElementById('download-pdf-btn');
-			const copyResumeBtn = document.getElementById('copy-resume-btn');
-			const copyCoverBtn = document.getElementById('copy-cover-btn');
-			const tailoredResumeText = document.getElementById('tailored-resume-text');
-			const coverLetterText = document.getElementById('cover-letter-text');
-			const suggestionsContainer = document.getElementById('suggestions-container');
-			const interviewContainer = document.getElementById('interview-container');
-
-			const matchScoreNum = document.getElementById('match-score-num');
-			const matchScoreProgress = document.getElementById('match-score-progress');
-			const fitSummaryText = document.getElementById('fit-summary-text');
-
-			// Search Jobs Trigger
-			searchBtn.addEventListener('click', performSearch);
-			jobTitleInput.addEventListener('keypress', (e) => {
-			if (e.key === 'Enter') performSearch();
-			});
-
-			async function performSearch() {
-			const query = jobTitleInput.value.trim();
-			if (!query) return;
-
-			// Update UI state
-			searchBtn.disabled = true;
-			searchBtn.innerHTML = `<div class="spinner" style="width:16px; height:16px; border-width:2px; margin-right:4px;"></div> Searching...`;
-			jobsListContainer.innerHTML = `
-			<div class="loader-wrapper">
-				<div class="spinner"></div>
-				<div class="loader-text">Scraping the 10 most recent listings from LinkedIn...</div>
-			</div>
-			`;
-
-			try {
-			const response = await fetch(`/api/jobs?title=${encodeURIComponent(query)}&limit=10`);
-			const data = await response.json();
-
-			jobListings = data;
-			jobCountBadge.textContent = `${data.length} found`;
-			renderJobsList();
-			} catch (err) {
-			console.error(err);
-			jobsListContainer.innerHTML = `
-			<div class="detail-placeholder">
-				<p style="color:var(--warning)">Failed to fetch jobs. Please verify API is running and try again.</p>
-			</div>
-			`;
-			} finally {
-			searchBtn.disabled = false;
-			searchBtn.innerHTML = `
-			<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-			</svg>
-			Search Jobs
-			`;
-			}
-			}
-
-			function renderJobsList() {
-			if (jobListings.length === 0) {
-			jobsListContainer.innerHTML = `
-			<div class="detail-placeholder">
-				<p>No job listings found for this title.</p>
-			</div>
-			`;
-			return;
-			}
-
-			jobsListContainer.innerHTML = '';
-			jobListings.forEach((job, idx) => {
-			const card = document.createElement('div');
-			card.className = 'job-card';
-			if (selectedJob && selectedJob.link === job.link) {
-			card.className += ' active';
-			}
-			card.innerHTML = `
-			<div class="job-card-title">${escapeHTML(job.title)}</div>
-			<div class="job-card-company">${escapeHTML(job.company)}</div>
-			<div class="job-card-meta">
-				<span>${escapeHTML(job.location)}</span>
-				<span class="badge-date">${escapeHTML(job.posted_date)}</span>
-			</div>
-			`;
-			card.addEventListener('click', () => selectJob(job, card));
-			jobsListContainer.appendChild(card);
-			});
-			}
-
-			function selectJob(job, cardElement) {
-			selectedJob = job;
-
-			// Highlight selected card
-			document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
-			cardElement.classList.add('active');
-
-			// Render preview panel
-			jobDetailTitle.textContent = job.title;
-			jobDetailCompany.textContent = job.company;
-			jobDetailLocation.textContent = job.location;
-			jobDetailLink.href = job.link;
-			jobInfoPreview.classList.remove('hidden');
-
-			// Populate the LinkedIn Job URL textarea
-			jobDescriptionInput.value = job.link;
-
-			tailorEmptyState.classList.add('hidden');
-			tailorResultView.classList.add('hidden');
-			tailorInputView.classList.remove('hidden');
-			}
-
-			// Optimize Button Action
-			optimizeBtn.addEventListener('click', async () => {
-			const jobSource = jobDescriptionInput.value.trim();
-			if (!jobSource) {
-			alert("Please enter a LinkedIn Job Posting URL or select a job from the list.");
-			return;
-			}
-
-			const profileSource = resumeInput.value.trim();
-			if (!profileSource) {
-			alert("Please enter your LinkedIn Profile URL.");
-			return;
-			}
-
-			tailorInputView.classList.add('hidden');
-			tailorLoadingView.classList.remove('hidden');
-			loaderStatusText.innerHTML = `Running EasyApplier Multi-Agent suite...<br>
-				<span style="font-size: 11.5px; opacity:0.8; display:inline-block; margin-top:8px;">
-					1. Scrapes full job specification<br>
-						2. Synthesizes LinkedIn candidate profile<br>
-							3. Computes ATS alignments & gaps<br>4. Formulates tailored cover letters & resumes</span>`;
-
-				let jobTitle = "Inferred from URL";
-				if (selectedJob && selectedJob.link === jobSource) {
-				jobTitle = selectedJob.title;
-				}
-
-				const payload = {
-				job_title: jobTitle,
-				job_description: jobSource,
-				resume_text: profileSource,
-				user_notes: ""
-				};
-
-				try {
-				const response = await fetch('/api/apply', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(payload)
-				});
-
-				if (!response.ok) {
-				const errorDetails = await response.json();
-				throw new Error(errorDetails.detail || "Server error");
-				}
-
-				const result = await response.json();
-				lastStrategyResult = result; // cache results
-				showResults(result);
-
-				} catch (err) {
-				console.error(err);
-				alert("Agent Error: " + err.message);
-				tailorLoadingView.classList.add('hidden');
-				tailorInputView.classList.remove('hidden');
-				}
-				});
-
-				function showResults(data) {
-				tailorLoadingView.classList.add('hidden');
-				tailorResultView.classList.remove('hidden');
-
-				// Populate text content
-				tailoredResumeText.textContent = data.tailored_resume || "";
-				coverLetterText.textContent = data.cover_letter || "";
-				fitSummaryText.textContent = data.fit_summary || "";
-
-				// Populate Score
-				const score = data.match_score || 0;
-				matchScoreNum.textContent = `${score}%`;
-				// Circle radius is 35, circumference is ~220
-				const offset = 220 - (220 * score) / 100;
-				matchScoreProgress.style.strokeDashoffset = offset;
-
-				// Set progress stroke color based on score
-				if (score >= 80) {
-				matchScoreProgress.style.stroke = 'var(--success)';
-				} else if (score >= 60) {
-				matchScoreProgress.style.stroke = 'var(--warning)';
-				} else {
-				matchScoreProgress.style.stroke = 'var(--danger)';
-				}
-
-				// Populate Suggestions list
-				suggestionsContainer.innerHTML = "";
-				if (data.resume_suggestions && data.resume_suggestions.length > 0) {
-				data.resume_suggestions.forEach(sug => {
-				const div = document.createElement('div');
-				div.className = "suggestion-item";
-				div.textContent = sug;
-				suggestionsContainer.appendChild(div);
-				});
-				} else {
-				suggestionsContainer.innerHTML = `<div class="detail-placeholder" style="padding:40px;">
-					<p>No gaps identified. Resume aligns fully!</p>
-				</div>`;
-				}
-
-				// Populate Interview list
-				interviewContainer.innerHTML = "";
-				if (data.interview_prep && data.interview_prep.length > 0) {
-				data.interview_prep.forEach(prep => {
-				const div = document.createElement('div');
-				div.className = "interview-item";
-
-				// Format Q & A block
-				const parts = prep.split('\n');
-				let questionHtml = "<h4>Interview Question</h4>";
-				let contentLines = [];
-				parts.forEach(l => {
-				const cleanL = l.trim();
-				if (cleanL.toLowerCase().startsWith('question:') || cleanL.toLowerCase().startsWith('q:')) {
-				questionHtml = `<h4>${escapeHTML(cleanL)}</h4>`;
-				} else {
-				if (cleanL) contentLines.push(escapeHTML(cleanL));
-				}
-				});
-
-				div.innerHTML = `
-				${questionHtml}
-				<p>
-					${contentLines.join('<br>')}</p>
-				`;
-				interviewContainer.appendChild(div);
-				});
-				} else {
-				interviewContainer.innerHTML = `<div class="detail-placeholder" style="padding:40px;">
-					<p>No targeted prep questions generated.</p>
-				</div>`;
-				}
-
-				// Default back to first tab (Resume)
-				document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-				document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-				document.querySelector('[data-tab="tab-resume"]').classList.add('active');
-				document.getElementById('tab-resume').classList.add('active');
-				}
-
-				// Tab Switching Logic
-				document.querySelectorAll('.tab-btn').forEach(btn => {
-				btn.addEventListener('click', () => {
-				const targetTabId = btn.getAttribute('data-tab');
-
-				// Toggle active buttons
-				document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-				btn.classList.add('active');
-
-				// Toggle active content divs
-				document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-				document.getElementById(targetTabId).classList.add('active');
-				});
-				});
-
-				// Restart configuration
-				restartBtn.addEventListener('click', () => {
-				tailorResultView.classList.add('hidden');
-				tailorInputView.classList.remove('hidden');
-				});
-
-				// Download dossier PDF
-				downloadPdfBtn.addEventListener('click', async () => {
-				if (!lastStrategyResult) return;
-
-				downloadPdfBtn.disabled = true;
-				downloadPdfBtn.innerHTML = `
-				<div class="spinner" style="width:14px; height:14px; border-width:2px; margin-right:4px;"></div>
-				Compiling...
-				`;
-
-				try {
-				const payload = {
-				strategy: lastStrategyResult,
-				job_title: selectedJob ? selectedJob.title : "Target Position",
-				company: selectedJob ? selectedJob.company : "Target Company",
-				linkedin_url: resumeInput.value.trim()
-				};
-
-				const response = await fetch('/api/apply/pdf', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(payload)
-				});
-
-				if (!response.ok) {
-				throw new Error("Failed to compile strategy dossier PDF package.");
-				}
-
-				const blob = await response.blob();
-				const downloadUrl = window.URL.createObjectURL(blob);
-				const a = document.createElement('a');
-				a.href = downloadUrl;
-				a.download = `EasyApplier_Tailored_Career_Package_${payload.company.replace(/\s+/g, '_')}.pdf`;
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
-
-				} catch (err) {
-				console.error(err);
-				alert("PDF Download Error: " + err.message);
-				} finally {
-				downloadPdfBtn.disabled = false;
-				downloadPdfBtn.innerHTML = `
-				<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-				</svg>
-				Download Dossier (.pdf)
-				`;
-				}
-				});
-
-				// Copy Clipboard Helper
-				function setupCopyButton(btn, textElement) {
-				btn.addEventListener('click', () => {
-				navigator.clipboard.writeText(textElement.textContent);
-				const originalHtml = btn.innerHTML;
-				btn.innerHTML = `
-				<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path>
-				</svg>
-				Copied!
-				`;
-				setTimeout(() => {
-				btn.innerHTML = originalHtml;
-				}, 2000);
-				});
-				}
-
-				setupCopyButton(copyResumeBtn, tailoredResumeText);
-				setupCopyButton(copyCoverBtn, coverLetterText);
-
-				// Safe HTML utility
-				function escapeHTML(str) {
-				return str.replace(/[&<>'"]/g,
-				tag => ({
-				'&': '&amp;',
-				'<': '&lt;',
-				'>': '&gt;',
-				"'": '&#39;',
-				'"': '&quot;'
-				}[tag] || tag)
-				);
-				}
-			</script>
-	</body>
+                <div>
+                    <h1 class="font-display text-xl font-bold tracking-tight">EasyApplier <span class="text-cyan-400 font-medium text-xs px-2 py-0.5 rounded-full bg-cyan-950/50 border border-cyan-800/30 ml-1.5">Simplified Demo v2</span></h1>
+                    <p class="text-[10px] text-slate-400 tracking-wider uppercase">Multi-Agent Career Operations</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-x-4">
+                <span class="text-xs text-slate-400 hidden sm:inline flex items-center gap-x-2">
+                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Gemini 3.5 Ready
+                </span>
+                <a href="https://www.linkedin.com/in/pinardkevin" target="_blank" class="text-slate-400 hover:text-white transition-colors text-sm">
+                    <i class="fa-brands fa-linkedin text-lg"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="relative z-10 max-w-6xl mx-auto px-6 py-12">
+        
+        <!-- Hero Introduction -->
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <h2 class="text-4xl sm:text-5xl font-display font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+                Dynamic Resume Tailoring
+            </h2>
+            <p class="text-slate-400 mt-3 text-base sm:text-lg">
+                Enter any job title, scrape live LinkedIn posts, select a listing, and generate a tailored resume snippet in real-time.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Side: Inputs & Scraping -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <!-- STEP 1: Search and Scrape LinkedIn -->
+                <div class="glass-panel p-6 rounded-2xl relative overflow-hidden transition-all duration-300">
+                    <div class="flex items-center gap-x-3 mb-4">
+                        <div class="w-7 h-7 bg-indigo-900/50 border border-indigo-700/30 text-indigo-400 rounded-lg flex items-center justify-center text-xs font-bold">1</div>
+                        <h3 class="font-display font-bold text-lg text-slate-100">Scrape Jobs</h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Job Title to Search</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                                    <i class="fa-solid fa-briefcase"></i>
+                                </span>
+                                <input type="text" id="jobSearchTitle" 
+                                       class="w-full bg-slate-950/60 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
+                                       placeholder="e.g. AI Engineer, Python Developer"
+                                       value="AI Developer">
+                            </div>
+                        </div>
+
+                        <button id="searchBtn" onclick="searchLinkedInJobs()"
+                                class="w-full py-3 px-4 rounded-xl btn-neon text-white text-sm font-bold flex items-center justify-center gap-x-2">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                            <span>Scrape LinkedIn Listings</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- STEP 2: Profile URL Input & Generate -->
+                <div id="step2Panel" class="glass-panel p-6 rounded-2xl relative overflow-hidden transition-all duration-300 opacity-60 pointer-events-none">
+                    <div class="flex items-center gap-x-3 mb-4">
+                        <div class="w-7 h-7 bg-indigo-900/50 border border-indigo-700/30 text-indigo-400 rounded-lg flex items-center justify-center text-xs font-bold">2</div>
+                        <h3 class="font-display font-bold text-lg text-slate-100">Tailor Resume</h3>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">LinkedIn Profile URL</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-500">
+                                    <i class="fa-brands fa-linkedin text-sm"></i>
+                                </span>
+                                <input type="url" id="linkedinProfileUrl" 
+                                       class="w-full bg-slate-950/60 border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-cyan-500 transition-colors font-mono"
+                                       placeholder="e.g. https://www.linkedin.com/in/your-name"
+                                       value="https://www.linkedin.com/in/pinardkevin">
+                            </div>
+                        </div>
+
+                        <button id="generateBtn" onclick="generateTailoredResume()" disabled
+                                class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-white text-sm font-bold flex items-center justify-center gap-x-2 shadow-lg shadow-cyan-500/10 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            <span>Generate Resume & Score</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Side: Job Listings List & Dynamic Tailor Results -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Scraped Jobs Output Container -->
+                <div id="jobsListContainer" class="glass-panel p-6 rounded-2xl min-h-[220px] transition-all flex flex-col justify-center">
+                    <div id="jobsListPlaceholder" class="text-center py-8 space-y-3">
+                        <div class="w-12 h-12 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto text-slate-400">
+                            <i class="fa-solid fa-list-check text-lg"></i>
+                        </div>
+                        <p class="text-slate-400 text-sm">Submit step 1 to fetch active LinkedIn guest postings.</p>
+                    </div>
+
+                    <!-- Scraping Loader -->
+                    <div id="jobsLoader" class="hidden text-center py-8 space-y-4">
+                        <div class="inline-block relative w-10 h-10">
+                            <div class="absolute top-0 left-0 w-full h-full border-4 border-cyan-500/20 rounded-full"></div>
+                            <div class="absolute top-0 left-0 w-full h-full border-4 border-t-cyan-500 rounded-full animate-spin"></div>
+                        </div>
+                        <p class="text-cyan-400 text-xs font-mono tracking-wider">Scraping LinkedIn Guest API...</p>
+                    </div>
+
+                    <!-- Job Listings List -->
+                    <div id="jobsList" class="hidden space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                        <div class="flex items-center justify-between border-b border-white/5 pb-3 mb-3">
+                            <h4 class="font-display font-bold text-sm text-slate-300">Select Job Listing</h4>
+                            <span class="text-[10px] bg-cyan-950 text-cyan-400 border border-cyan-800/30 px-2 py-0.5 rounded font-mono">10 Listings Found</span>
+                        </div>
+                        <div id="jobCards" class="space-y-2"></div>
+                    </div>
+                </div>
+
+                <!-- Tailoring Results Area (Hidden by default) -->
+                <div id="tailoringResult" class="hidden glass-panel p-6 rounded-2xl relative overflow-hidden space-y-6">
+                    
+                    <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                        <div class="flex items-center gap-x-2.5">
+                            <i class="fa-solid fa-square-poll-vertical text-cyan-400 text-lg"></i>
+                            <h3 class="font-display font-bold text-lg text-slate-100">Analysis &amp; Resume Snippet</h3>
+                        </div>
+                        <button onclick="copySnippet()" class="text-xs bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-300 border border-white/5 px-3 py-1.5 rounded-lg flex items-center gap-x-1.5 transition-colors">
+                            <i class="fa-solid fa-copy"></i> Copy Snippet
+                        </button>
+                    </div>
+
+                    <!-- Grid for match score & details -->
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                        <div class="md:col-span-4 flex flex-col items-center justify-center p-4 bg-slate-950/40 border border-white/5 rounded-xl text-center">
+                            <div id="progressRing" class="radial-progress animate-pulse-subtle" style="--percent: 0; width: 130px; height: 130px;">
+                                <div class="relative z-10 text-center">
+                                    <span id="scoreText" class="text-4xl font-display font-black text-cyan-400">0%</span>
+                                    <div class="text-[9px] tracking-widest text-slate-400 font-bold uppercase mt-0.5">Overall ATS Match</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-8 space-y-3">
+                            <div class="flex items-center gap-x-2 text-xs font-semibold text-emerald-400">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span>Multi-Dimensional ATS Matching Engine Activated</span>
+                            </div>
+                            <h4 id="resultJobTitle" class="font-display font-bold text-base text-slate-100"></h4>
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                Our modern ATS scoring model evaluates alignment across hard skills, professional title, educational requirements, and soft/domain competencies. This mimics standard applicant screening criteria.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Premium ATS Scoring Dimension Breakdown -->
+                    <div class="border-t border-white/5 pt-6 space-y-4">
+                        <h4 class="font-display font-bold text-xs text-slate-300 flex items-center gap-x-2 tracking-wider uppercase">
+                            <i class="fa-solid fa-chart-simple text-cyan-400 text-xs"></i>
+                            <span>ATS Matching Score Breakdown</span>
+                        </h4>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Hard Skills Match -->
+                            <div class="p-4 bg-slate-950/40 border border-white/5 rounded-xl space-y-2.5 hover:border-cyan-500/20 transition-all duration-300">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-x-2">
+                                        <div class="w-2 h-2 rounded-full bg-cyan-400"></div>
+                                        <span class="font-bold text-slate-200">Hard Skills &amp; Keywords</span>
+                                    </div>
+                                    <span class="text-slate-500 text-[10px]">Weight: 40%</span>
+                                    <span id="hardSkillsScore" class="font-mono font-black text-cyan-400 text-sm">0%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-900/80 rounded-full overflow-hidden">
+                                    <div id="hardSkillsBar" class="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                                <div id="hardSkillsFeedback" class="text-[11px] text-slate-400 leading-relaxed space-y-1 font-sans"></div>
+                            </div>
+
+                            <!-- Experience & Title -->
+                            <div class="p-4 bg-slate-950/40 border border-white/5 rounded-xl space-y-2.5 hover:border-emerald-500/20 transition-all duration-300">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-x-2">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-400"></div>
+                                        <span class="font-bold text-slate-200">Experience &amp; Job Title</span>
+                                    </div>
+                                    <span class="text-slate-500 text-[10px]">Weight: 30%</span>
+                                    <span id="experienceScore" class="font-mono font-black text-emerald-400 text-sm">0%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-900/80 rounded-full overflow-hidden">
+                                    <div id="experienceBar" class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                                <div id="experienceFeedback" class="text-[11px] text-slate-400 leading-relaxed space-y-1 font-sans"></div>
+                            </div>
+
+                            <!-- Education & Credentials -->
+                            <div class="p-4 bg-slate-950/40 border border-white/5 rounded-xl space-y-2.5 hover:border-indigo-500/20 transition-all duration-300">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-x-2">
+                                        <div class="w-2 h-2 rounded-full bg-indigo-400"></div>
+                                        <span class="font-bold text-slate-200">Education &amp; Credentials</span>
+                                    </div>
+                                    <span class="text-slate-500 text-[10px]">Weight: 15%</span>
+                                    <span id="educationScore" class="font-mono font-black text-indigo-400 text-sm">0%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-900/80 rounded-full overflow-hidden">
+                                    <div id="educationBar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                                <div id="educationFeedback" class="text-[11px] text-slate-400 leading-relaxed space-y-1 font-sans"></div>
+                            </div>
+
+                            <!-- Soft Skills & Domain -->
+                            <div class="p-4 bg-slate-950/40 border border-white/5 rounded-xl space-y-2.5 hover:border-violet-500/20 transition-all duration-300">
+                                <div class="flex items-center justify-between text-xs">
+                                    <div class="flex items-center gap-x-2">
+                                        <div class="w-2 h-2 rounded-full bg-violet-400"></div>
+                                        <span class="font-bold text-slate-200">Soft Skills &amp; Domain Fit</span>
+                                    </div>
+                                    <span class="text-slate-500 text-[10px]">Weight: 15%</span>
+                                    <span id="softSkillsScore" class="font-mono font-black text-violet-400 text-sm">0%</span>
+                                </div>
+                                <div class="h-1.5 w-full bg-slate-900/80 rounded-full overflow-hidden">
+                                    <div id="softSkillsBar" class="h-full bg-gradient-to-r from-violet-500 to-fuchsia-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                                </div>
+                                <div id="softSkillsFeedback" class="text-[11px] text-slate-400 leading-relaxed space-y-1 font-sans"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tailored Resume Content -->
+                    <div class="space-y-2 border-t border-white/5 pt-6">
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400">Tailored Resume Snippet (Markdown)</label>
+                        <div class="relative group">
+                            <pre id="resumeContent" class="w-full bg-slate-950/80 border border-white/10 rounded-xl p-5 text-xs text-slate-200 font-mono whitespace-pre-wrap max-h-[350px] overflow-y-auto leading-relaxed"></pre>
+                            <div class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <span class="bg-indigo-900 text-indigo-200 border border-indigo-700/50 text-[10px] px-2 py-1 rounded font-bold uppercase">PREVIEW ONLY</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Low Score / Error Panel (Custom Warn Box) -->
+                <div id="errorPanel" class="hidden glass-panel p-8 rounded-2xl border-orange-500/30 bg-orange-950/20 text-center space-y-4">
+                    <div class="w-12 h-12 bg-orange-500/10 border border-orange-500/30 rounded-full flex items-center justify-center mx-auto text-orange-400 text-lg">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-display font-bold text-slate-100 text-base">Insufficient Match Score</h4>
+                        <p id="errorMessageText" class="text-sm text-orange-200/80 font-semibold leading-relaxed"></p>
+                    </div>
+                </div>
+
+                <!-- Loading / Generating State -->
+                <div id="generatingState" class="hidden glass-panel p-8 rounded-2xl text-center space-y-4">
+                    <div class="flex justify-center items-center gap-x-2">
+                        <div class="w-3 h-3 bg-cyan-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                        <div class="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                        <div class="w-3 h-3 bg-accent rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+                    </div>
+                    <div class="space-y-1">
+                        <h4 class="font-display font-bold text-slate-200 text-base">Orchestrating AI Agents</h4>
+                        <p id="orchestratorStatus" class="text-xs text-slate-400 font-mono">Researcher is parsing profiles...</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-white/5 mt-16 py-6 bg-slate-950/20 text-center text-xs text-slate-500">
+        <p>© 2026 EasyApplier. Deployed under Google Cloud App Hub boundary.</p>
+    </footer>
+
+    <!-- Frontend Core logic -->
+    <script>
+        // Track the current selected job listing
+        let selectedJob = null;
+        let jobScrapeResults = [];
+
+        // Allow pressing enter on search input
+        document.getElementById('jobSearchTitle').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchLinkedInJobs();
+            }
+        });
+
+        // 1. Step 1: Scrape Jobs from LinkedIn
+        async function searchLinkedInJobs() {
+            const searchInput = document.getElementById('jobSearchTitle').value.trim();
+            if (!searchInput) {
+                alert('Please enter a job title to scrape.');
+                return;
+            }
+
+            const searchBtn = document.getElementById('searchBtn');
+            const placeholder = document.getElementById('jobsListPlaceholder');
+            const loader = document.getElementById('jobsLoader');
+            const jobsList = document.getElementById('jobsList');
+            const jobCardsContainer = document.getElementById('jobCards');
+
+            // Set UI to loading state
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Scraping...`;
+            placeholder.classList.add('hidden');
+            jobsList.classList.add('hidden');
+            loader.classList.remove('hidden');
+
+            // Clear selected state
+            selectedJob = null;
+            document.getElementById('generateBtn').disabled = true;
+            document.getElementById('step2Panel').classList.add('opacity-60', 'pointer-events-none');
+            document.getElementById('tailoringResult').classList.add('hidden');
+            document.getElementById('errorPanel').classList.add('hidden');
+
+            try {
+                // Fetch from FastAPI endpoint (configured to retrieve up to 10 matching listings)
+                const response = await fetch(`/api/jobs?title=${encodeURIComponent(searchInput)}&limit=10`);
+                if (!response.ok) {
+                    throw new Error('Could not scrape listings. LinkedIn server rate-limited or guest block occurred.');
+                }
+
+                const jobs = await response.json();
+                jobScrapeResults = jobs;
+
+                // Handle no results
+                if (!jobs || jobs.length === 0) {
+                    jobCardsContainer.innerHTML = `
+                        <div class="text-center py-6 text-sm text-slate-500 border border-dashed border-white/10 rounded-xl">
+                            No listings returned. Please try a different title or search string.
+                        </div>
+                    `;
+                } else {
+                    // Populate listings cards
+                    jobCardsContainer.innerHTML = '';
+                    jobs.forEach((job, index) => {
+                        const card = document.createElement('div');
+                        card.className = 'job-card glass-panel p-4 rounded-xl border border-white/5 flex items-start gap-x-4 transition-all duration-200';
+                        card.setAttribute('onclick', `selectJobListing(${index})`);
+                        card.id = `job-card-${index}`;
+
+                        const workplaceBadgeColor = 
+                            job.workplace_type === 'Remote' ? 'bg-emerald-950 text-emerald-400 border-emerald-800/30' :
+                            job.workplace_type === 'Hybrid' ? 'bg-cyan-950 text-cyan-400 border-cyan-800/30' : 
+                            'bg-slate-900 text-slate-400 border-white/5';
+
+                        card.innerHTML = `
+                            <div class="mt-1">
+                                <div class="custom-radio"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-x-2">
+                                    <h5 class="font-display font-bold text-sm text-slate-200 truncate group-hover:text-white">${job.title}</h5>
+                                    <span class="shrink-0 text-[10px] px-1.5 py-0.5 rounded border ${workplaceBadgeColor}">
+                                        ${job.workplace_type}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400 font-medium truncate mt-0.5">${job.company} • ${job.location}</p>
+                                <div class="flex items-center gap-x-3 mt-2 text-[10px] text-slate-500">
+                                    <span><i class="fa-regular fa-clock mr-1"></i>${job.posted_date}</span>
+                                    ${job.easy_apply ? '<span class="text-cyan-400 font-semibold"><i class="fa-solid fa-bolt mr-1"></i>Easy Apply</span>' : ''}
+                                </div>
+                            </div>
+                        `;
+                        jobCardsContainer.appendChild(card);
+                    });
+                }
+
+                // Show listings
+                loader.classList.add('hidden');
+                jobsList.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                placeholder.classList.remove('hidden');
+                loader.classList.add('hidden');
+                alert(`Scraper exception: ${error.message}`);
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = `<i class="fa-solid fa-magnifying-glass text-xs"></i> <span>Scrape LinkedIn Listings</span>`;
+            }
+        }
+
+        // Select a job listing (radio button trigger)
+        function selectJobListing(index) {
+            // Remove previous selected class
+            document.querySelectorAll('.job-card').forEach(el => el.classList.remove('selected'));
+
+            // Set state
+            selectedJob = jobScrapeResults[index];
+
+            // Add selected style
+            const selectedCard = document.getElementById(`job-card-${index}`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+
+            // Enable step 2 input panel
+            const step2Panel = document.getElementById('step2Panel');
+            step2Panel.classList.remove('opacity-60', 'pointer-events-none');
+
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = false;
+        }
+
+        // 2. Step 3: Trigger Multi-Agent Generator
+        async function generateTailoredResume() {
+            if (!selectedJob) {
+                alert('Please select a job listing first.');
+                return;
+            }
+
+            const profileUrl = document.getElementById('linkedinProfileUrl').value.trim();
+            if (!profileUrl) {
+                alert('Please enter a LinkedIn Profile URL to evaluate.');
+                return;
+            }
+
+            const resultPanel = document.getElementById('tailoringResult');
+            const errorPanel = document.getElementById('errorPanel');
+            const generatingState = document.getElementById('generatingState');
+            const generateBtn = document.getElementById('generateBtn');
+
+            // Set loading
+            generateBtn.disabled = true;
+            resultPanel.classList.add('hidden');
+            errorPanel.classList.add('hidden');
+            generatingState.classList.remove('hidden');
+
+            // Rotate statuses for premium agentic feel
+            const statuses = [
+                "Researcher Agent is analyzing job specification...",
+                "Researcher Agent is parsing LinkedIn profile content...",
+                "Strategist Agent is performing semantic gap analysis...",
+                "Tailor Agent is optimizing keyword matches...",
+                "Generating premium resume copy snippet..."
+            ];
+            let statusIndex = 0;
+            const statusEl = document.getElementById('orchestratorStatus');
+            statusEl.textContent = statuses[0];
+            const interval = setInterval(() => {
+                statusIndex = (statusIndex + 1) % statuses.length;
+                statusEl.textContent = statuses[statusIndex];
+            }, 3500);
+
+            try {
+                // Call /api/apply API route
+                const response = await fetch('/api/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_title: `${selectedJob.title} at ${selectedJob.company}`,
+                        job_description: selectedJob.link, // Send link so backend scrapes description!
+                        resume_text: profileUrl // Send profile URL so backend extracts profile info
+                    })
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Tailoring pipeline failed.');
+                }
+
+                const data = await response.json();
+                clearInterval(interval);
+
+                // Populate and render tailoring results
+                document.getElementById('resultJobTitle').textContent = `${selectedJob.title} — ${selectedJob.company}`;
+                document.getElementById('resumeContent').textContent = data.tailored_resume || '';
+
+                // Score Ring updates
+                const matchScore = data.match_score || 0;
+                document.getElementById('scoreText').textContent = `${matchScore}%`;
+                
+                const progressRing = document.getElementById('progressRing');
+                progressRing.style.setProperty('--percent', matchScore);
+                
+                // Set ring colors based on alignment quality
+                if (matchScore >= 80) {
+                    progressRing.style.background = `conic-gradient(#10b981 calc(${matchScore} * 1%), rgba(255, 255, 255, 0.1) 0)`;
+                } else if (matchScore >= 60) {
+                    progressRing.style.background = `conic-gradient(#06b6d4 calc(${matchScore} * 1%), rgba(255, 255, 255, 0.1) 0)`;
+                } else {
+                    progressRing.style.background = `conic-gradient(#f59e0b calc(${matchScore} * 1%), rgba(255, 255, 255, 0.1) 0)`;
+                }
+
+                // Populate individual ATS dimensional scores and progress bars
+                const hardScore = data.hard_skills_score || 0;
+                document.getElementById('hardSkillsScore').textContent = `${hardScore}%`;
+                document.getElementById('hardSkillsBar').style.width = `${hardScore}%`;
+                document.getElementById('hardSkillsFeedback').innerHTML = formatFeedback(data.hard_skills_feedback);
+
+                const expScore = data.experience_score || 0;
+                document.getElementById('experienceScore').textContent = `${expScore}%`;
+                document.getElementById('experienceBar').style.width = `${expScore}%`;
+                document.getElementById('experienceFeedback').innerHTML = formatFeedback(data.experience_feedback);
+
+                const eduScore = data.education_score || 0;
+                document.getElementById('educationScore').textContent = `${eduScore}%`;
+                document.getElementById('educationBar').style.width = `${eduScore}%`;
+                document.getElementById('educationFeedback').innerHTML = formatFeedback(data.education_feedback);
+
+                const softScore = data.soft_skills_score || 0;
+                document.getElementById('softSkillsScore').textContent = `${softScore}%`;
+                document.getElementById('softSkillsBar').style.width = `${softScore}%`;
+                document.getElementById('softSkillsFeedback').innerHTML = formatFeedback(data.soft_skills_feedback);
+
+                // Show Results
+                generatingState.classList.add('hidden');
+                resultPanel.classList.remove('hidden');
+                resultPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } catch (error) {
+                console.error(error);
+                clearInterval(interval);
+                generatingState.classList.add('hidden');
+                alert(`Agent workflow exception: ${error.message}`);
+            } finally {
+                generateBtn.disabled = false;
+            }
+        }
+
+        // Format raw bullet lines into pretty HTML bullets
+        function formatFeedback(text) {
+            if (!text) return '';
+            return text
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0)
+                .map(line => {
+                    const clean = line.replace(/^[-*•]\s*/, '');
+                    return `<div class="flex items-start gap-x-1.5 mt-1">
+                        <span class="text-cyan-500/80 mt-0.5">•</span>
+                        <span>${clean}</span>
+                    </div>`;
+                })
+                .join('');
+        }
+
+        // Copy resume snippet
+        function copySnippet() {
+            const snippet = document.getElementById('resumeContent').textContent;
+            navigator.clipboard.writeText(snippet).then(() => {
+                alert('Tailored resume snippet copied to clipboard!');
+            }).catch(err => {
+                alert('Could not copy to clipboard.');
+            });
+        }
+    </script>
+</body>
 </html>

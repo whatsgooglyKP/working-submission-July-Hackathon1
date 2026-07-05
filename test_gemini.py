@@ -22,12 +22,13 @@ print(f"Key loaded: {api_key[:6]}...{api_key[-4:] if len(api_key) > 10 else ''}"
 print("Configuring GenAI client...")
 
 try:
-    # Initialize client
-    client = genai.Client(api_key=api_key)
+    # Initialize client using the same robust method as the agents
+    from agents.base import get_gemini_client
+    client = get_gemini_client()
     
-    print("Sending test request to Gemini 2.5 Flash...")
+    print("Sending test request to Gemini...")
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
         contents="Say hello and confirm you are online!"
     )
     
